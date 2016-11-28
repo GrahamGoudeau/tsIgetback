@@ -86,9 +86,8 @@ export class Route {
         if (routeBuilder.isAjax == null) {
             this.isAjax = false;
         }
-    }
-};
 
-export function addSecureRoute(app: express.Express, route: string, httpMethod: HttpMethod): Number {
-    return 4;
+        this.route = routeBuilder.route;
+        this.cont = routeBuilder.cont;
+    }
 };
