@@ -36,6 +36,7 @@ export class RouteManager {
                 } else {
                     res.status(401).send('not authorized');
                 }
+                return;
             }
             route.cont(req, res);
             return;
