@@ -30,7 +30,7 @@ export class RouteManager {
         }
         method(route.route, (req, res) => {
             // import security
-            if (!req.headers['cookie'] || false) {
+            if (route.isSecure && (!req.headers['cookie'] || false)) {
                 if (!route.isAjax) {
                     res.redirect('/login');
                 } else {
