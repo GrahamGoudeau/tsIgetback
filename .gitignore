@@ -1,0 +1,4 @@
+*.js
+*.swp
+.tscache/
+node_modules/
