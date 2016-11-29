@@ -80,21 +80,21 @@ export class RouteBuilder {
 export class Route {
     readonly route: string;
     readonly cont: Continuation;
-    readonly httpMethod: HttpMethod;
-    readonly isSecure: boolean;
-    readonly isAjax: boolean;
+    readonly httpMethod: HttpMethod = HttpMethod.GET;
+    readonly isSecure: boolean = false;
+    readonly isAjax: boolean = false;
 
     constructor(routeBuilder: RouteBuilder) {
-        if (routeBuilder.httpMethod == null) {
-            this.httpMethod = HttpMethod.GET;
+        if (routeBuilder.httpMethod != null) {
+            this.httpMethod = routeBuilder.httpMethod;
         }
 
-        if (routeBuilder.isSecure == null) {
-            this.isSecure = false;
+        if (routeBuilder.isSecure != null) {
+            this.isSecure = routeBuilder.isSecure;
         }
 
-        if (routeBuilder.isAjax == null) {
-            this.isAjax = false;
+        if (routeBuilder.isAjax != null) {
+            this.isAjax = routeBuilder.isAjax;
         }
 
         this.route = routeBuilder.route;
