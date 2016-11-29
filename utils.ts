@@ -101,3 +101,25 @@ export class Route {
         this.cont = routeBuilder.cont;
     }
 };
+
+interface IGetBackResponse {
+    error?: {
+        message: string
+        error?: any
+    },
+    data?: any
+}
+
+export function badRequest(res: express.Response, message?: any, error?: any): void {
+    const errorResponse: IGetBackResponse = {
+        error: {
+            message: message == null ? 'bad request' : message
+        }
+    };
+
+    if (error) {
+        errorResponse.error = error;
+    }
+
+    res.status(400).send(errorResponse);
+}
