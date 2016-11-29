@@ -46,7 +46,7 @@ export function buildAuthToken(email: string): string {
 }
 
 export function parseCookie(cookie: string): Maybe<AuthToken> {
-    const fail = Maybe.nothing<AuthToken>();
+    const fail: Maybe<AuthToken> = Maybe.nothing<AuthToken>();
     if (!cookie) {
         return fail;
     }
