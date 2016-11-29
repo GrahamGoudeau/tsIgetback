@@ -1,21 +1,21 @@
 import * as mongoose from 'mongoose';
 
-type ObjectIdTs = mongoose.Types.ObjectId;
-const ObjectIdSchema = mongoose.Schema.Types.ObjectId;
+export type ObjectIdTs = mongoose.Types.ObjectId;
+export const ObjectIdSchema = mongoose.Schema.Types.ObjectId;
 
-interface ITrip {
-    ownerEmail: String,
-    maxOtherMembers: Number,
-    tripMemberIds: ObjectIdTs[],
-    tripDate: Date,
-    tripHour: Number,
-    tripQuarterHour: Number,
-    tripName: String,
-    college: String,
+export interface ITrip {
+    ownerEmail: String;
+    maxOtherMembers: Number;
+    tripMemberIds: ObjectIdTs[];
+    tripDate: Date;
+    tripHour: Number;
+    tripQuarterHour: Number;
+    tripName: String;
+    college: String;
     airport: String
 }
 
-interface ITripModel extends ITrip, mongoose.Document{};
+export interface ITripModel extends ITrip, mongoose.Document{};
 const tripSchema = new mongoose.Schema({
     ownerEmail: String,
     maxOtherMembers: Number,
@@ -31,7 +31,7 @@ const tripSchema = new mongoose.Schema({
 export const FromAirport = mongoose.model<ITripModel>("fromAirport", tripSchema);
 export const FromCampus = mongoose.model<ITripModel>("fromCampus", tripSchema);
 
-interface IUser {
+export interface IUser {
     firstName: String,
     lastName: String,
     dateCreated: Date,
@@ -43,7 +43,8 @@ interface IUser {
     tripsFromAirport: ObjectIdTs[]
 }
 
-interface IUserModel extends IUser, mongoose.Document{};
+export interface IUserModel extends IUser, mongoose.Document{};
+
 const userSchema = new mongoose.Schema({
     firstName: String,
     lastName: String,
