@@ -5,4 +5,4 @@ setup:
 		npm install
 
 watch:
-		tsc -w --noEmitOnError
+		tsc -w
