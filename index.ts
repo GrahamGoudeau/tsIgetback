@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as user from './user';
 import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
 import * as utils from './utils';
@@ -30,8 +31,21 @@ const indexBuilder = new utils.RouteBuilder('/', (req, res) => {
     res.json('ok');
 });
 
+const userCreateBuilder = new utils.RouteBuilder('/createUser', user.createUser)
+    .setIsAjax(true)
+    .setIsSecure(false)
+    .setHttpMethod(utils.HttpMethod.POST);
+
 const indexRoute = new utils.Route(indexBuilder);
-routeManager.addRoute(indexRoute);
+const createRoute = new utils.Route(userCreateBuilder);
+
+const routes: utils.Route[] = [
+    indexRoute,
+    createRoute
+];
+
+routeManager.addRoutes(routes);
+
 
 //app.set('port', process.env.PORT || 5000);
 //app.get('/', (req, res) => res.send(4));
