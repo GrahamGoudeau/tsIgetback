@@ -4,6 +4,11 @@ import * as bodyParser from 'body-parser';
 import * as utils from './utils';
 
 const app: express.Express = express();
+
+// app configuration must appear before routes are set
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
+
 const airportCodesFile: string = __dirname + '/data/airport-codes.dat';
 const collegesFile: string = __dirname + '/data/colleges.dat';
 
