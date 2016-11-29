@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as express from 'express';
+import * as security from './security';
 
 type Continuation = (req: express.Request, res: express.Response) => void;
 
@@ -16,6 +17,12 @@ export class RouteManager {
     constructor(private app: express.Express) {
     }
 
+    public addRoutes(routes: Route[]): void {
+        for (let route of routes) {
+            this.addRoute(route);
+        }
+    }
+
     public addRoute(route: Route): void {
         let method: (route: string, cont: Continuation) => void;
         switch (route.httpMethod) {
@@ -27,19 +34,22 @@ export class RouteManager {
                 method = this.app.post.bind(this.app);
                 break;
             }
+            default: {
+                console.trace('Misconfigured route:', route);
+                break;
+            }
         }
         method(route.route, (req, res) => {
-            // import security
-            if (route.isSecure && (!req.headers['cookie'] || false)) {
+            const cookie: string = req.headers['cookie'];
+            if (route.isSecure && !security.validateCookie(cookie)) {
                 if (!route.isAjax) {
                     res.redirect('/login');
                 } else {
                     res.status(401).send('not authorized');
                 }
-                return;
+            } else {
+                route.cont(req, res);
             }
-            route.cont(req, res);
-            return;
         });
     }
 };
