@@ -18,9 +18,7 @@ export class RouteManager {
     }
 
     public addRoutes(routes: Route[]): void {
-        for (let route of routes) {
-            this.addRoute(route);
-        }
+        routes.forEach(this.addRoute);
     }
 
     public addRoute(route: Route): void {
@@ -45,7 +43,7 @@ export class RouteManager {
                 if (!route.isAjax) {
                     res.redirect('/login');
                 } else {
-                    res.status(401).send('not authorized');
+                    unauthorizedError(res);
                 }
             } else {
                 route.cont(req, res);
@@ -102,24 +100,42 @@ export class Route {
     }
 };
 
-interface IGetBackResponse {
+export interface IGetBackResponse {
     error?: {
         message: string
-        error?: any
+        exn?: any
     },
     data?: any
 }
 
-export function badRequest(res: express.Response, message?: any, error?: any): void {
+function buildIGetBackResponse(message: string, error?: any): IGetBackResponse {
     const errorResponse: IGetBackResponse = {
         error: {
-            message: message == null ? 'bad request' : message
+            message: message
         }
     };
 
-    if (error) {
-        errorResponse.error = error;
+    if (error != null) {
+        errorResponse.error.exn = error;
     }
 
-    res.status(400).send(errorResponse);
+    return errorResponse;
+}
+
+export function badRequest(res: express.Response, message?: string, error?: any): void {
+    const response: IGetBackResponse = buildIGetBackResponse(message == null ? 'bad request' : message, error);
+
+    res.status(400).json(response);
+}
+
+export function internalError(res: express.Response, message?: string, error?: any): void {
+    const response: IGetBackResponse = buildIGetBackResponse(message == null ? 'internal server error' : message, error);
+
+    res.status(500).json(response);
+}
+
+export function unauthorizedError(res: express.Response, message?: string, error?: any): void {
+    const response: IGetBackResponse = buildIGetBackResponse(message == null ? 'unauthorized' : message, error);
+
+    res.status(401).json(response);
 }
