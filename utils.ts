@@ -18,7 +18,7 @@ export class RouteManager {
     }
 
     public addRoutes(routes: Route[]): void {
-        routes.forEach(this.addRoute);
+        routes.forEach(route => this.addRoute(route));
     }
 
     public addRoute(route: Route): void {
