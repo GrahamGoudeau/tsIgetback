@@ -17,13 +17,17 @@ if (process.env.PRODUCTION === 'true') {
     dbUrl = 'mongodb://localhost:27017/igetback-db';
 }
 mongoose.connect(dbUrl);
-const builder = new utils.RouteBuilder('/', (req, res) => {
+
+const routeManager = new utils.RouteManager(app);
+
+const indexBuilder = new utils.RouteBuilder('/', (req, res) => {
     console.log('responding...');
     res.json('ok');
 });
-const newRoute = new utils.Route(builder);
-const manager = new utils.RouteManager(app);
-manager.addRoute(newRoute);
+
+const indexRoute = new utils.Route(indexBuilder);
+routeManager.addRoute(indexRoute);
+
 //app.set('port', process.env.PORT || 5000);
 //app.get('/', (req, res) => res.send(4));
 //app.get('/products', (req, res) => res.send('Got a request for products'));
