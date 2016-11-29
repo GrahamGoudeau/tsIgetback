@@ -15,11 +15,11 @@ export class DatabaseError extends Error {
         super(message);
     }
 
-    static userExists() {
+    static userExists(): DatabaseError {
         return new DatabaseError('user exists', DatabaseErrorMessages.USER_EXISTS);
     }
 
-    static userNotFound() {
+    static userNotFound(): DatabaseError {
         return new DatabaseError('user not found', DatabaseErrorMessages.USER_NOT_FOUND);
     }
 }
@@ -32,6 +32,10 @@ export interface OneUserQuery {
 
 export interface UserPasswordQuery extends OneUserQuery {
     password: string
+}
+
+export interface TripsQuery {
+    tripIds: models.ObjectIdTs[]
 }
 
 function hashPassword(email: string, password: string) {
@@ -72,4 +76,20 @@ async function getUserFromQuery(query: OneUserQuery): Promise<models.IUser> {
 
 export async function getUser(query: OneUserQuery): Promise<models.IUser> {
     return getUserFromQuery(query);
+}
+
+async function getTrips(query: TripsQuery, model: mongoose.Model<models.ITripModel>): Promise<models.ITrip[]> {
+    return await model.find({
+        '_id': {
+            '$in': query.tripIds
+        }
+    });
+}
+
+export async function getTripsFromAirport(query: TripsQuery): Promise<models.ITrip[]> {
+    return getTrips(query, models.FromAirport);
+}
+
+export async function getTripsFromCampus(query: TripsQuery): Promise<models.ITrip[]> {
+    return getTrips(query, models.FromCampus);
 }
