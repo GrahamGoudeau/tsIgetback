@@ -4,15 +4,15 @@ export type ObjectIdTs = mongoose.Types.ObjectId;
 export const ObjectIdSchema = mongoose.Schema.Types.ObjectId;
 
 export interface ITrip {
-    ownerEmail: String;
+    ownerEmail: string;
     maxOtherMembers: Number;
     tripMemberIds: ObjectIdTs[];
     tripDate: Date;
     tripHour: Number;
     tripQuarterHour: Number;
-    tripName: String;
-    college: String;
-    airport: String
+    tripName: string;
+    college: string;
+    airport: string
 }
 
 export interface ITripModel extends ITrip, mongoose.Document{};
@@ -32,12 +32,12 @@ export const FromAirport = mongoose.model<ITripModel>("fromAirport", tripSchema)
 export const FromCampus = mongoose.model<ITripModel>("fromCampus", tripSchema);
 
 export interface IUser {
-    firstName: String,
-    lastName: String,
+    firstName: string,
+    lastName: string,
     dateCreated: Date,
     lastLogin: Date,
-    passwordHash: String,
-    email: String,
+    passwordHash: string,
+    email: string,
     verified: boolean,
     tripsFromCampus: ObjectIdTs[],
     tripsFromAirport: ObjectIdTs[]
