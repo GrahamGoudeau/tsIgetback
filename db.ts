@@ -38,8 +38,19 @@ export interface UserPasswordQuery extends OneUserQuery {
     password: string
 }
 
-export interface TripsQuery {
+export interface FindTripsQuery {
     tripIds: models.ObjectIdTs[]
+}
+
+export interface CreateTripQuery {
+    ownerEmail: string;
+    maxOtherMembers: Number;
+    tripDate: Date;
+    tripHour: Number;
+    tripQuarterHour: Number;
+    tripName: string;
+    college: string;
+    airport: string;
 }
 
 function hashPassword(email: string, password: string) {
@@ -91,7 +102,7 @@ export async function getUserFromEmailAndPassword(query: UserPasswordQuery): Pro
     return Either.right(user);
 }
 
-async function getTrips(query: TripsQuery, model: mongoose.Model<models.ITripModel>): Promise<models.ITrip[]> {
+async function getTrips(query: FindTripsQuery, model: mongoose.Model<models.ITripModel>): Promise<models.ITrip[]> {
     return await model.find({
         '_id': {
             '$in': query.tripIds
@@ -99,10 +110,18 @@ async function getTrips(query: TripsQuery, model: mongoose.Model<models.ITripMod
     });
 }
 
-export async function getTripsFromAirport(query: TripsQuery): Promise<models.ITrip[]> {
-    return getTrips(query, models.FromAirport);
+async function createTrip(query: CreateTripQuery, model: mongoose.Model<models.ITripModel>): Promise<models.ITrip> {
+    return;
 }
 
-export async function getTripsFromCampus(query: TripsQuery): Promise<models.ITrip[]> {
+export async function createTripFromCampus(query: CreateTripQuery): Promise<models.ITrip> {
+    return createTrip(query, models.FromCampus);
+}
+
+export async function getTripsFromCampus(query: FindTripsQuery): Promise<models.ITrip[]> {
     return getTrips(query, models.FromCampus);
+}
+
+export async function getTripsFromAirport(query: FindTripsQuery): Promise<models.ITrip[]> {
+    return getTrips(query, models.FromAirport);
 }
