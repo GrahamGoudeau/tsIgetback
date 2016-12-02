@@ -1,8 +1,19 @@
 import * as fs from 'fs';
 import * as express from 'express';
 import * as security from './security';
+import * as tsmonad from 'tsmonad';
 
-type Continuation = (req: express.Request, res: express.Response) => void;
+export type InsecureContinuation = (req: express.Request,
+                            res: express.Response,
+                            authToken?: security.AuthToken) => void;
+
+export type SecureContinuation = (req: express.Request,
+                                  res: express.Response,
+                                  authToken: security.AuthToken) => void;
+
+type ExpressContinuation = (req: express.Request, res: express.Response) => void;
+
+type Either<L, R> = tsmonad.Either<L, R>;
 
 export enum HttpMethod {
     GET,
@@ -17,88 +28,133 @@ export class RouteManager {
     constructor(private app: express.Express) {
     }
 
-    public addRoutes(routes: Route[]): void {
-        routes.forEach(route => this.addRoute(route));
+    public addSecureRoutes(routes: SecureRoute[]): void {
+        routes.forEach(route => this.addSecureRoute(route));
     }
 
-    public addRoute(route: Route): void {
-        let method: (route: string, cont: Continuation) => void;
-        switch (route.httpMethod) {
+    public addInsecureRoutes(routes: InsecureRoute[]): void {
+        routes.forEach(route => this.addInsecureRoute(route));
+    }
+
+    private determineMethod(method: HttpMethod): (string, ExpressContinuation) => void {
+        switch (method) {
             case HttpMethod.GET: {
-                method = this.app.get.bind(this.app);
-                break;
+                return this.app.get.bind(this.app);
             }
             case HttpMethod.POST: {
-                method = this.app.post.bind(this.app);
-                break;
+                return this.app.post.bind(this.app);
             }
             default: {
-                console.trace('Misconfigured route:', route);
+                console.trace('Misconfigured route');
                 break;
             }
         }
+        return null;
+    }
+
+    public addInsecureRoute(route: InsecureRoute): void {
+        let method: (string, ExpressContinuation) => void = this.determineMethod(route.httpMethod);
+
         method(route.route, (req, res) => {
             const cookie: string = req.headers['cookie'];
-            if (route.isSecure && !security.validateCookie(cookie)) {
+            const authTokenResult: tsmonad.Maybe<security.AuthToken> = security.parseCookie(cookie);
+
+            authTokenResult.caseOf({
+                just: (token: security.AuthToken) => route.cont(req, res, token),
+                nothing: () => route.cont(req, res)
+            });
+        });
+    }
+
+    public addSecureRoute(route: SecureRoute): void {
+        let method: (string, ExpressContinuation) => void = this.determineMethod(route.httpMethod);
+
+        method(route.route, (req, res) => {
+            const cookie: string = req.headers['cookie'];
+            const authTokenResult: tsmonad.Maybe<security.AuthToken> = security.parseCookie(cookie);
+            const unauthorizedCont = () => {
                 if (!route.isAjax) {
                     res.redirect('/login');
                 } else {
                     unauthorizedError(res);
                 }
-            } else {
-                route.cont(req, res);
-            }
+            };
+
+            authTokenResult.caseOf({
+                just: (token: security.AuthToken) => {
+                    if (!security.validateAuthToken(token)) {
+                        unauthorizedCont();
+                    } else {
+                        route.cont(req, res, token);
+                    }
+                },
+                nothing: () => {
+                    unauthorizedCont();
+                }
+            });
         });
     }
 };
 
-export class RouteBuilder {
+class RouteBuilder {
     public httpMethod?: HttpMethod;
-    public isSecure?: boolean;
     public isAjax?: boolean;
 
-    constructor(readonly route: string, readonly cont: Continuation) {}
+    constructor(readonly route: string) {}
 
-    setHttpMethod(method: HttpMethod): RouteBuilder {
+    setHttpMethod<T extends RouteBuilder>(method: HttpMethod): T {
         this.httpMethod = method;
-        return this;
+        return <T><any>this;
     }
 
-    setIsSecure(isSecure: boolean): RouteBuilder {
-        this.isSecure = isSecure;
-        return this;
-    }
-
-    setIsAjax(isAjax: boolean): RouteBuilder {
+    setIsAjax<T extends RouteBuilder>(isAjax: boolean): T {
         this.isAjax = isAjax;
-        return this;
+        return <T><any>this;
     }
 };
 
-export class Route {
-    readonly route: string;
-    readonly cont: Continuation;
-    readonly httpMethod: HttpMethod = HttpMethod.GET;
-    readonly isSecure: boolean = false;
-    readonly isAjax: boolean = false;
+export class InsecureRouteBuilder extends RouteBuilder {
+    constructor(readonly route: string, readonly cont: InsecureContinuation) {
+        super(route);
+    }
+}
 
-    constructor(routeBuilder: RouteBuilder) {
-        if (routeBuilder.httpMethod != null) {
-            this.httpMethod = routeBuilder.httpMethod;
+export class SecureRouteBuilder extends RouteBuilder {
+    constructor(readonly route: string, readonly cont: SecureContinuation) {
+        super(route);
+    }
+}
+
+class Route {
+    constructor(readonly route: string,
+                readonly httpMethod?: HttpMethod,
+                readonly isAjax?: boolean) {
+        if (!httpMethod) {
+            this.httpMethod = HttpMethod.GET;
         }
 
-        if (routeBuilder.isSecure != null) {
-            this.isSecure = routeBuilder.isSecure;
+        if (!isAjax) {
+            this.isAjax = false;
         }
-
-        if (routeBuilder.isAjax != null) {
-            this.isAjax = routeBuilder.isAjax;
-        }
-
-        this.route = routeBuilder.route;
-        this.cont = routeBuilder.cont;
     }
 };
+
+export class InsecureRoute extends Route {
+    readonly cont: InsecureContinuation;
+    constructor(builder: InsecureRouteBuilder) {
+        super(builder.route, builder.httpMethod, builder.isAjax);
+        this.cont = builder.cont;
+    }
+}
+
+export class SecureRoute extends Route {
+    readonly cont: SecureContinuation;
+    constructor(builder: SecureRouteBuilder) {
+        super(builder.route, builder.httpMethod, builder.isAjax);
+        this.cont = builder.cont;
+    }
+}
+
 
 export interface IGetBackResponse {
     error?: {
