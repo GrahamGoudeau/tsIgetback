@@ -12,23 +12,39 @@ const formatLatin: crypto.HexBase64Latin1Encoding = 'hex';
 const password = process.env.CRYPT_PASS;
 
 export function encrypt(text: string): string {
-    const cipher = crypto.createCipher(algorithm, password);
-    const encrypted = cipher.update(text, encoding, formatBinary);
+    try {
+        const cipher = crypto.createCipher(algorithm, password);
+        const encrypted = cipher.update(text, encoding, formatBinary);
 
-    return encrypted + cipher.final(formatBinary);
+        return encrypted + cipher.final(formatBinary);
+    } catch (e) {
+        console.trace('crypto error in encrypt', e);
+        return '';
+    }
 }
 
 export function decrypt(encrypted: string): string {
-    const decipher = crypto.createDecipher(algorithm, password);
-    const dec = decipher.update(encrypted, formatBinary, encoding);
+    try {
+        const decipher = crypto.createDecipher(algorithm, password);
+        const dec = decipher.update(encrypted, formatBinary, encoding);
 
-    return dec + decipher.final(encoding);
+        return dec + decipher.final(encoding);
+    } catch (e) {
+        console.trace('crypto error in decrypt', e);
+        return '';
+    }
 }
 
 export function hashPassword(salt: string, password: string): string {
-    const hashMethod = crypto.createHmac(hash, salt);
-    hashMethod.update(password);
-    return hashMethod.digest(formatLatin);
+    try {
+        const hashMethod = crypto.createHmac(hash, salt);
+        hashMethod.update(password);
+        return hashMethod.digest(formatLatin);
+    } catch (e) {
+        console.trace('could not hash password', password, 'with salt', salt, 'e:', e);
+        // TODO: probably a bad idea?
+        return null;
+    }
 }
 
 export interface AuthToken {
@@ -61,10 +77,16 @@ export function parseCookie(cookie: string): Maybe<AuthToken> {
 
     const token: string = match[1];
     try {
-        const result: any = JSON.parse(this.decrypt(token));
-        if (result.email && result.authorizedAt) {
-            return Maybe.just(result);
+        const deserializedResult: any = JSON.parse(decrypt(token));
+        if (!deserializedResult.email || !deserializedResult.authorizedAt) {
+            return fail;
         }
+        const result: AuthToken = {
+            email: deserializedResult.email,
+            authorizedAt: new Date(deserializedResult.authorizedAt)
+        };
+
+        return Maybe.just(result);
     } catch (e) {
         console.trace('JSON exception parsing cookie:', e);
         console.trace('JSON:', decrypt(token));
@@ -75,14 +97,18 @@ export function parseCookie(cookie: string): Maybe<AuthToken> {
 
 export function validateCookie(cookie: string): boolean {
     const tokenResult: Maybe<AuthToken> = parseCookie(cookie);
-    const currentTime = new Date();
-    const oneHour = 3600000;
 
     return tokenResult.caseOf({
         just: (token: AuthToken) => {
-            const expiresAt = new Date(token.authorizedAt.getTime() + oneHour);
-            return expiresAt > currentTime;
+            return validateAuthToken(token);
         },
         nothing: () => false
     });
+}
+
+export function validateAuthToken(token: AuthToken) {
+    const currentTime = new Date();
+    const oneHour = 3600000;
+    const expiresAt = new Date(token.authorizedAt.getTime() + oneHour);
+    return expiresAt > currentTime;
 }
