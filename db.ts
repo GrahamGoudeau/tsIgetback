@@ -81,6 +81,12 @@ export async function createUser(firstName: string, lastName: string, email: str
     return Either.right(await newUser.save());
 }
 
+export async function recordLogin(query: OneUserQuery) {
+    const updated = await models.User.findOneAndUpdate(query, {
+        lastLogin: new Date()
+    }, { new: true });
+}
+
 export async function getUserFromEmail(query: OneUserQuery): Promise<DatabaseResult<IUser>> {
     const existingUser = await models.User.findOne(query);
     if (existingUser == null) {

@@ -56,16 +56,19 @@ export async function handleLogin(req: express.Request, res: express.Response): 
         try {
             const query: db.UserPasswordQuery = obj;
             const dbResult: DatabaseResult<IUser> = await db.getUserFromEmailAndPassword(query);
-            const t = dbResult.caseOf({
-                right: user => {
+            dbResult.caseOf({
+                right: async user => {
                     const response: utils.IGetBackResponse = {
                         data: {
                             authToken: security.buildAuthToken(user.email)
                         }
                     };
-                    res.json(response);
+                    utils.jsonResponse(res, {
+                        authToken: security.buildAuthToken(user.email)
+                    });
+                    await db.recordLogin({email: user.email});
                 },
-                left: error => {
+                left: async error => {
                     if (error === db.DatabaseErrorMessage.USER_NOT_FOUND) {
                         utils.unauthorizedError(res, 'could not find user');
                     } else {
