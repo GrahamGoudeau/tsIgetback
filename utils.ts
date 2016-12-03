@@ -4,8 +4,7 @@ import * as security from './security';
 import * as tsmonad from 'tsmonad';
 
 export type InsecureContinuation = (req: express.Request,
-                            res: express.Response,
-                            authToken?: security.AuthToken) => void;
+                            res: express.Response) => void;
 
 export type SecureContinuation = (req: express.Request,
                                   res: express.Response,
@@ -54,16 +53,7 @@ export class RouteManager {
 
     public addInsecureRoute(route: InsecureRoute): void {
         let method: (string, ExpressContinuation) => void = this.determineMethod(route.httpMethod);
-
-        method(route.route, (req, res) => {
-            const cookie: string = req.headers['cookie'];
-            const authTokenResult: tsmonad.Maybe<security.AuthToken> = security.parseCookie(cookie);
-
-            authTokenResult.caseOf({
-                just: (token: security.AuthToken) => route.cont(req, res, token),
-                nothing: () => route.cont(req, res)
-            });
-        });
+        method(route.route, route.cont);
     }
 
     public addSecureRoute(route: SecureRoute): void {
@@ -164,7 +154,7 @@ export interface IGetBackResponse {
     data?: any
 }
 
-function buildIGetBackResponse(message: string, error?: any): IGetBackResponse {
+function buildIGetBackError(message: string, error?: any): IGetBackResponse {
     const errorResponse: IGetBackResponse = {
         error: {
             message: message
@@ -179,19 +169,27 @@ function buildIGetBackResponse(message: string, error?: any): IGetBackResponse {
 }
 
 export function badRequest(res: express.Response, message?: string, error?: any): void {
-    const response: IGetBackResponse = buildIGetBackResponse(message == null ? 'bad request' : message, error);
+    const response: IGetBackResponse = buildIGetBackError(message == null ? 'bad request' : message, error);
 
     res.status(400).json(response);
 }
 
 export function internalError(res: express.Response, message?: string, error?: any): void {
-    const response: IGetBackResponse = buildIGetBackResponse(message == null ? 'internal server error' : message, error);
+    const response: IGetBackResponse = buildIGetBackError(message == null ? 'internal server error' : message, error);
 
     res.status(500).json(response);
 }
 
 export function unauthorizedError(res: express.Response, message?: string, error?: any): void {
-    const response: IGetBackResponse = buildIGetBackResponse(message == null ? 'unauthorized' : message, error);
+    const response: IGetBackResponse = buildIGetBackError(message == null ? 'unauthorized' : message, error);
 
     res.status(401).json(response);
+}
+
+export function jsonResponse(res: express.Response, result: any): void {
+    const response: IGetBackResponse = {
+        data: result
+    };
+
+    res.status(200).json(response);
 }

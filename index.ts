@@ -60,12 +60,17 @@ const tripFromCampusCreateBuilder = <SecureRouteBuilder>new utils.SecureRouteBui
     .setIsAjax(true)
     .setHttpMethod(utils.HttpMethod.POST);
 
+const tripFromAirportCreateBuilder = <SecureRouteBuilder>new utils.SecureRouteBuilder('/api/fromAirport/create', trips.handleFromAirportCreate)
+    .setIsAjax(true)
+    .setHttpMethod(utils.HttpMethod.POST);
+
 // construct and set routes
 const indexRoute: utils.InsecureRoute = <InsecureRoute>new utils.InsecureRoute(indexBuilder);
 const createRoute: utils.InsecureRoute = new utils.InsecureRoute(userCreateBuilder);
 const loginRoute: utils.InsecureRoute = new utils.InsecureRoute(loginBuilder);
 const secureRoute: utils.SecureRoute = new utils.SecureRoute(secureTestBuilder);
 const fromCampusCreateRoute: utils.SecureRoute = new utils.SecureRoute(tripFromCampusCreateBuilder);
+const fromAirportCreateRoute: utils.SecureRoute = new utils.SecureRoute(tripFromAirportCreateBuilder);
 
 const insecureRoutes = [
     indexRoute,
@@ -75,6 +80,7 @@ const insecureRoutes = [
 
 const secureRoutes = [
     fromCampusCreateRoute,
+    fromAirportCreateRoute,
 ];
 
 routeManager.addInsecureRoutes(insecureRoutes);
