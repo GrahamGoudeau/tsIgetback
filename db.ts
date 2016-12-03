@@ -9,7 +9,8 @@ const Either = tsmonad.Either;
 
 export enum DatabaseErrorMessage {
     USER_EXISTS,
-    USER_NOT_FOUND
+    USER_NOT_FOUND,
+    DB_ERROR
 }
 
 export type DatabaseResult<T> = Either<DatabaseErrorMessage, T>
@@ -110,12 +111,23 @@ async function getTrips(query: FindTripsQuery, model: mongoose.Model<models.ITri
     });
 }
 
-async function createTrip(query: CreateTripQuery, model: mongoose.Model<models.ITripModel>): Promise<models.ITrip> {
-    return;
+async function createTrip(query: CreateTripQuery, model: mongoose.Model<models.ITripModel>): Promise<DatabaseResult<models.ITrip>> {
+    try {
+        const newTrip: models.ITripModel = new model(query);
+        const t = await newTrip.save();
+        return Either.right(t);
+    } catch (e) {
+        console.trace('exception creating trip:', e);
+        throw e;
+    }
 }
 
-export async function createTripFromCampus(query: CreateTripQuery): Promise<models.ITrip> {
+export async function createTripFromCampus(query: CreateTripQuery): Promise<DatabaseResult<models.ITrip>> {
     return createTrip(query, models.FromCampus);
+}
+
+export async function createTripFromAirport(query: CreateTripQuery): Promise<DatabaseResult<models.ITrip>> {
+    return createTrip(query, models.FromAirport);
 }
 
 export async function getTripsFromCampus(query: FindTripsQuery): Promise<models.ITrip[]> {
@@ -124,4 +136,31 @@ export async function getTripsFromCampus(query: FindTripsQuery): Promise<models.
 
 export async function getTripsFromAirport(query: FindTripsQuery): Promise<models.ITrip[]> {
     return getTrips(query, models.FromAirport);
+}
+
+enum AddToCampusOrAirport {
+    TO_CAMPUS,
+    TO_AIRPORT
+}
+
+async function addNewTripToUser(id: models.ObjectIdTs, userEmail: string, tripKind: AddToCampusOrAirport): Promise<void> {
+    const updateObj = {
+        '$push': {}
+    };
+    updateObj['$push'][tripKind === AddToCampusOrAirport.TO_CAMPUS ? 'tripsFromCampus' : 'tripsFromAirport'] = id;
+    const searchObj = {
+        email: userEmail
+    };
+    const user = await getUserFromEmail({email: userEmail});
+    const result = await models.User.findOneAndUpdate(searchObj, updateObj, {new: true});
+
+   return;
+}
+
+export async function addNewTripFromCampusToUser(id: models.ObjectIdTs, userEmail: string): Promise<void> {
+    return addNewTripToUser(id, userEmail, AddToCampusOrAirport.TO_CAMPUS);
+}
+
+export async function addNewTripFromAirportToUser(id: models.ObjectIdTs, userEmail: string): Promise<void> {
+    return addNewTripToUser(id, userEmail, AddToCampusOrAirport.TO_AIRPORT);
 }
