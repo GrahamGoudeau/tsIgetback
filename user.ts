@@ -12,6 +12,7 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
     const obj: any = req.body;
     if (!obj) {
         utils.badRequest(res);
+        return;
     }
 
     if (obj.firstName && obj.lastName && obj.email && obj.password) {
