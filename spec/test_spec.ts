@@ -9,6 +9,7 @@ describe('A user', () => {
     let lastName: string;
     let userEmail: string;
     let userPassword: string;
+    let userIds: models.ObjectIdTs[];
 
     beforeAll( () => {
         firstName = test_utils.makeString(10);
@@ -16,6 +17,11 @@ describe('A user', () => {
         const emailName = test_utils.makeString(16);
         userEmail = `${emailName}@testDomain.com`;
         userPassword = test_utils.makeString(16);
+        userIds = [];
+    });
+
+    afterAll( () => {
+        // TODO: delete created users
     });
 
     it('can reject creation requests', async (done) => {
@@ -52,6 +58,7 @@ describe('A user', () => {
         expect(newUserResponse.data == null).toBe(false);
         expect(newUserResponse.error == null).toBe(true);
         expect(newUserResponse.data.email).toBe(userEmail);
+        userIds.push(newUserResponse.data._id);
         done();
     });
 
