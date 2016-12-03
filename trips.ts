@@ -47,7 +47,7 @@ async function handleTripCreate(req: express.Request,
         obj.ownerEmail = authToken.email;
         const query: db.CreateTripQuery = obj;
         const createdTripResult: DatabaseResult<ITrip> = await cont(query);
-        return createdTripResult.caseOf({
+        return await createdTripResult.caseOf({
             left: async (err: db.DatabaseErrorMessage) => {
                 utils.badRequest(res, 'could not save trip');
                 throw new Error('could not save trip');

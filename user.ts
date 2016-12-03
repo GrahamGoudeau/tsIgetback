@@ -23,7 +23,7 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
                                                                        obj.password);
             const success = newUser.caseOf({
                 right: newUser => {
-                    res.send(newUser);
+                    utils.jsonResponse(res, newUser);
                     return true;
                 },
                 left: error => {
