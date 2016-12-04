@@ -25,7 +25,7 @@ export function makeString(length: number)
 export async function login(email: string, password: string): Promise<AuthToken> {
     try {
         const loginResponse: IGetBackResponse = await WebRequest.json<IGetBackResponse>(
-            makeEndpoint('login'),
+            makeEndpoint('user/login'),
             {
                 method: 'POST',
                 json: true,

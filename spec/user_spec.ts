@@ -20,13 +20,17 @@ describe('A user', () => {
         userIds = [];
     });
 
-    afterAll( () => {
-        // TODO: delete created users
+    afterAll( async () => {
+        for (let userId of userIds) {
+            console.log('requesting...');
+            const r = await WebRequest.delete(test_utils.makeEndpoint('user/delete'));
+            console.log(r);
+        }
     });
 
-    it('can reject creation requests', async (done) => {
+    it('can reject invalid creation requests', async (done) => {
         const newUserResponse: IGetBackResponse = await WebRequest.json<IGetBackResponse>(
-            test_utils.makeEndpoint('createUser'),
+            test_utils.makeEndpoint('user/create'),
             {
                 method: 'POST',
                 json: true,
@@ -43,7 +47,7 @@ describe('A user', () => {
 
     it('can be created', async (done) => {
         const newUserResponse: IGetBackResponse = await WebRequest.json<IGetBackResponse>(
-            test_utils.makeEndpoint('createUser'),
+            test_utils.makeEndpoint('user/create'),
             {
                 method: 'POST',
                 json: true,
