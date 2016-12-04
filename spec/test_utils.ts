@@ -1,7 +1,7 @@
-import * as models from '../models';
+import * as models from '../api/models';
 import * as WebRequest from 'web-request';
-import { AuthToken } from '../security';
-import { IGetBackResponse } from '../utils';
+import { AuthToken } from '../api/security';
+import { IGetBackResponse } from '../api/utils';
 
 const portNumber = process.env.PORT || 5000;
 const rootUrl = `http://localhost:${portNumber}`;

@@ -1,6 +1,6 @@
-import * as models from '../models';
-import { IGetBackResponse } from '../utils';
-import { AuthToken } from '../security';
+import * as models from '../api/models';
+import { IGetBackResponse } from '../api/utils';
+import { AuthToken } from '../api/security';
 import * as test_utils from './test_utils';
 import * as WebRequest from 'web-request';
 
@@ -21,11 +21,6 @@ describe('A user', () => {
     });
 
     afterAll( async () => {
-        for (let userId of userIds) {
-            console.log('requesting...');
-            const r = await WebRequest.delete(test_utils.makeEndpoint('user/delete'));
-            console.log(r);
-        }
     });
 
     it('can reject invalid creation requests', async (done) => {
