@@ -16,7 +16,8 @@ type Either<L, R> = tsmonad.Either<L, R>;
 
 export enum HttpMethod {
     GET,
-    POST
+    POST,
+    DELETE,
 };
 
 export function readLines(filePath: string): string[] {
@@ -42,6 +43,9 @@ export class RouteManager {
             }
             case HttpMethod.POST: {
                 return this.app.post.bind(this.app);
+            }
+            case HttpMethod.DELETE: {
+                return this.app.delete.bind(this.app);
             }
             default: {
                 console.trace('Misconfigured route');
@@ -71,14 +75,14 @@ export class RouteManager {
             };
 
             authTokenResult.caseOf({
-                just: (token: security.AuthToken) => {
-                    if (!security.validateAuthToken(token)) {
+                just: async (token: security.AuthToken) => {
+                    if (!(await security.validateAuthToken(token))) {
                         unauthorizedCont();
                     } else {
                         route.cont(req, res, token);
                     }
                 },
-                nothing: () => {
+                nothing: async () => {
                     unauthorizedCont();
                 }
             });

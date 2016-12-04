@@ -43,11 +43,15 @@ const indexBuilder: utils.InsecureRouteBuilder = new utils.InsecureRouteBuilder(
     res.json('ok');
 });
 
-const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/createUser', user.handleCreateUser)
+const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user/create', user.handleCreateUser)
     .setIsAjax(true)
     .setHttpMethod(utils.HttpMethod.POST);
 
-const loginBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new utils.InsecureRouteBuilder('/api/login', user.handleLogin)
+const userDeleteBuilder: SecureRouteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/delete', user.handleDelete)
+    .setIsAjax(true)
+    .setHttpMethod(utils.HttpMethod.DELETE);
+
+const loginBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new utils.InsecureRouteBuilder('/api/user/login', user.handleLogin)
     .setIsAjax(true)
     .setHttpMethod(utils.HttpMethod.POST);
 
@@ -67,6 +71,7 @@ const tripFromAirportCreateBuilder = <SecureRouteBuilder>new utils.SecureRouteBu
 // construct and set routes
 const indexRoute: utils.InsecureRoute = <InsecureRoute>new utils.InsecureRoute(indexBuilder);
 const createRoute: utils.InsecureRoute = new utils.InsecureRoute(userCreateBuilder);
+const deleteUserRoute: utils.SecureRoute = new utils.SecureRoute(userDeleteBuilder);
 const loginRoute: utils.InsecureRoute = new utils.InsecureRoute(loginBuilder);
 const secureRoute: utils.SecureRoute = new utils.SecureRoute(secureTestBuilder);
 const fromCampusCreateRoute: utils.SecureRoute = new utils.SecureRoute(tripFromCampusCreateBuilder);
@@ -81,6 +86,7 @@ const insecureRoutes = [
 const secureRoutes = [
     fromCampusCreateRoute,
     fromAirportCreateRoute,
+    deleteUserRoute,
 ];
 
 routeManager.addInsecureRoutes(insecureRoutes);
@@ -88,8 +94,6 @@ routeManager.addSecureRoutes(secureRoutes);
 
 
 // run
-const server = app.listen(8000, "localhost", () => {
-    const {address, port} = server.address();
-    console.log('Listening on http://localhost:' + port);
-});
-
+const port = process.env.PORT || 5000;
+const server = app.listen(port);
+console.log(`Listening on port ${port}`);

@@ -46,10 +46,24 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
     }
 }
 
+export async function handleDelete(req: express.Request, res: express.Response): Promise<void> {
+    if (!req.body) {
+        utils.badRequest(res);
+        return;
+    }
+
+    if (req.body.email) {
+        db.deleteUser({email: req.body.email});
+    } else {
+        utils.badRequest(res, 'missing email field');
+    }
+}
+
 export async function handleLogin(req: express.Request, res: express.Response): Promise<void> {
     const obj: any = req.body;
     if (!obj) {
         utils.badRequest(res);
+        return;
     }
 
     if (obj.email && obj.password) {
@@ -58,11 +72,6 @@ export async function handleLogin(req: express.Request, res: express.Response): 
             const dbResult: DatabaseResult<IUser> = await db.getUserFromEmailAndPassword(query);
             dbResult.caseOf({
                 right: async user => {
-                    const response: utils.IGetBackResponse = {
-                        data: {
-                            authToken: security.buildAuthToken(user.email)
-                        }
-                    };
                     utils.jsonResponse(res, {
                         authToken: security.buildAuthToken(user.email)
                     });
