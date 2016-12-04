@@ -87,6 +87,16 @@ export async function recordLogin(query: OneUserQuery) {
     }, { new: true });
 }
 
+export async function deleteUser(query: OneUserQuery): Promise<void> {
+    await models.User.remove(query);
+    return;
+}
+
+export async function doesUserExist(query: OneUserQuery): Promise<boolean> {
+    const numFound: number = await models.User.count(query);
+    return numFound !== 0;
+}
+
 export async function getUserFromEmail(query: OneUserQuery): Promise<DatabaseResult<IUser>> {
     const existingUser = await models.User.findOne(query);
     if (existingUser == null) {
