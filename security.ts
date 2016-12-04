@@ -1,5 +1,7 @@
 import * as crypto from 'crypto';
 import * as tsmonad from 'tsmonad';
+import { IUser } from './models';
+import * as db from './db';
 
 const Maybe = tsmonad.Maybe;
 type Maybe<T> = tsmonad.Maybe<T>;
@@ -95,20 +97,21 @@ export function parseCookie(cookie: string): Maybe<AuthToken> {
     return fail;
 }
 
-export function validateCookie(cookie: string): boolean {
+export async function validateCookie(cookie: string): Promise<boolean> {
     const tokenResult: Maybe<AuthToken> = parseCookie(cookie);
 
-    return tokenResult.caseOf({
-        just: (token: AuthToken) => {
-            return validateAuthToken(token);
+    return await tokenResult.caseOf({
+        just: async (token: AuthToken) => {
+            return await validateAuthToken(token);
         },
-        nothing: () => false
+        nothing: async () => false
     });
 }
 
-export function validateAuthToken(token: AuthToken) {
+export async function validateAuthToken(token: AuthToken): Promise<boolean> {
     const currentTime = new Date();
     const oneHour = 3600000;
     const expiresAt = new Date(token.authorizedAt.getTime() + oneHour);
-    return expiresAt > currentTime;
+    const userExists: boolean = await db.doesUserExist({email: token.email});
+    return expiresAt > currentTime && userExists;
 }
