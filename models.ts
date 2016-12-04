@@ -1,9 +1,38 @@
 import * as mongoose from 'mongoose';
+import { Validator } from "validator.ts/Validator";
+import { Contains, NotEmpty, IsInt, IsLength, IsEmail, IsDate } from "validator.ts/decorator/Validation";
+import { Escape } from "validator.ts/decorator/Sanitization";
 
 export type ObjectIdTs = mongoose.Types.ObjectId;
 export const ObjectIdSchema = mongoose.Schema.Types.ObjectId;
 
-export interface ITrip {
+export class Trip {
+    @IsInt({min: 0})
+    maxOtherMembers: Number;
+
+    @IsDate()
+    tripDate: Date;
+
+    @IsInt({min: 0, max: 23})
+    tripHour: Number;
+
+    @IsInt({min: 0, max: 45})
+    tripQuarterHour: Number;
+
+    @Escape()
+    @NotEmpty()
+    tripName: string;
+
+    @Escape()
+    @NotEmpty()
+    college: string;
+
+    @Escape()
+    @NotEmpty()
+    airport: string;
+}
+
+export interface ITrip extends Trip {
     ownerEmail: string;
     maxOtherMembers: Number;
     tripMemberIds: ObjectIdTs[];
@@ -28,8 +57,8 @@ const tripSchema = new mongoose.Schema({
     airport: String
 });
 
-export const FromAirport = mongoose.model<ITripModel>("fromAirport", tripSchema);
-export const FromCampus = mongoose.model<ITripModel>("fromCampus", tripSchema);
+export const FromAirport = mongoose.model<ITripModel>("fromAirport", tripSchema, "fromAirport");
+export const FromCampus = mongoose.model<ITripModel>("fromCampus", tripSchema, "fromCampus");
 
 export interface IUser {
     firstName: string,
@@ -57,5 +86,5 @@ const userSchema = new mongoose.Schema({
     tripsFromAirport: [ObjectIdSchema]
 });
 
-export const User = mongoose.model<IUserModel>("user", userSchema);
+export const User = mongoose.model<IUserModel>("user", userSchema, "users");
 

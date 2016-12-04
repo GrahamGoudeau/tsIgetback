@@ -5,7 +5,9 @@ import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
 import * as mongoose from 'mongoose';
+import { Validator } from "validator.ts/Validator";
 
+const validator: Validator = new Validator();
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type ITrip = models.ITrip;
 
@@ -14,52 +16,44 @@ async function handleTripCreate(req: express.Request,
                                 authToken: security.AuthToken,
                                 cont: (query: db.CreateTripQuery) => Promise<DatabaseResult<models.ITrip>>
                                ): Promise<models.ITripModel> {
-    /* TODO: security validation
-    const validateTrip: (any) => tsmonad.Maybe<db.CreateTripQuery> = (obj) => {
-        const dateRegex = /[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}/;
-        return obj.maxOtherMembers &&
-            obj.tripDate &&
-            obj.tripHour &&
-            obj.tripQuarterHour &&
-            obj.tripName &&
-            obj.college &&
-            obj.airport &&
-            dateRegex.test(obj.tripDate) &&
-            (typeof obj.tripHour === 'number') &&
-            (typeof obj.
-
-
-    };
-    */
     if (!req.body) {
         utils.badRequest(res);
         return;
     }
-    const obj: any = req.body;
 
-    if (obj.maxOtherMembers &&
-            obj.tripDate &&
-            obj.tripHour &&
-            obj.tripQuarterHour &&
-            obj.tripName &&
-            obj.college &&
-            obj.airport) {
-        obj.ownerEmail = authToken.email;
-        const query: db.CreateTripQuery = obj;
-        const createdTripResult: DatabaseResult<ITrip> = await cont(query);
-        return await createdTripResult.caseOf({
-            left: async (err: db.DatabaseErrorMessage) => {
-                utils.badRequest(res, 'could not save trip');
-                throw new Error('could not save trip');
-            },
-            right: async (trip: models.ITripModel) => {
-                return trip;
-            }
-        });
-    } else {
-        utils.badRequest(res, 'missing trip creation fields');
-        return;
+    const toValidate = new models.Trip();
+    for (let key in req.body) {
+        toValidate[key] = req.body[key];
     }
+
+    let tripRequest: models.Trip;
+    try {
+        tripRequest = await validator.sanitizeAndValidateAsync<models.Trip>(toValidate);
+    } catch (e) {
+        console.trace('failed to validate trip:', toValidate, e);
+        throw e;
+    }
+
+    const query: db.CreateTripQuery = {
+        ownerEmail: authToken.email,
+        maxOtherMembers: tripRequest.maxOtherMembers,
+        tripDate: tripRequest.tripDate,
+        tripHour: tripRequest.tripHour,
+        tripQuarterHour: tripRequest.tripQuarterHour,
+        tripName: tripRequest.tripName,
+        college: tripRequest.college,
+        airport: tripRequest.airport
+    };
+    const createdTripResult: DatabaseResult<ITrip> = await cont(query);
+    return await createdTripResult.caseOf({
+        left: async (err: db.DatabaseErrorMessage) => {
+            utils.badRequest(res, 'could not save trip');
+            throw new Error('could not save trip');
+        },
+        right: async (trip: models.ITripModel) => {
+            return trip;
+        }
+    });
 }
 
 export async function handleFromCampusCreate(req: express.Request, res: express.Response, authToken: security.AuthToken): Promise<void> {
@@ -68,7 +62,7 @@ export async function handleFromCampusCreate(req: express.Request, res: express.
         createdTrip = await handleTripCreate(req, res, authToken, db.createTripFromCampus);
     } catch (e) {
         console.trace('exception while creating trip from campus', e);
-        utils.badRequest(res);
+        utils.badRequest(res, 'failed to create trip');
         return;
     }
 
@@ -87,8 +81,8 @@ export async function handleFromAirportCreate(req: express.Request, res: express
     try {
         createdTrip = await handleTripCreate(req, res, authToken, db.createTripFromAirport);
     } catch (e) {
-        console.trace('exception while creating trip from campus', e);
-        utils.badRequest(res);
+        console.trace('exception while creating trip from airport', e);
+        utils.badRequest(res, 'failed to create trip');
         return;
     }
 

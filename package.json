@@ -2,10 +2,12 @@
   "name": "tsIgetback",
   "version": "1.0.0",
   "description": "",
-  "main": "build/index.js",
+  "main": "ts-node index.ts",
   "scripts": {
     "test": "ts-node node_modules/jasmine/bin/jasmine.js spec/*.ts",
-    "dev": "env $(cat .env) nodemon -e js --exec 'ts-node' index.ts"
+    "dev": "env $(cat .env) nodemon -e js --exec 'ts-node' index.ts",
+    "build": "tsc",
+    "watch": "tsc -w"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +32,7 @@
     "mongoose": "^4.7.0",
     "ts-node": "^1.7.0",
     "tsmonad": "0.6.1",
+    "typescript": "^2.0.10",
     "validator.ts": "0.2.2",
     "web-request": "^1.0.7"
   }
