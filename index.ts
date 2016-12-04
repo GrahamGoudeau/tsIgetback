@@ -1,10 +1,10 @@
 import * as express from 'express';
-import * as user from './user';
-import * as trips from './trips';
+import * as user from './api/user';
+import * as trips from './api/trips';
 import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
-import * as utils from './utils';
-import { InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './utils';
+import * as utils from './api/utils';
+import { InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
 import * as tsmonad from 'tsmonad';
 
 type Either<L, R> = tsmonad.Either<L, R>;
@@ -27,11 +27,13 @@ const colleges: string[] = utils.readLines(collegesFile);
 let dbUrl: string;
 if (process.env.PRODUCTION === 'true') {
     console.log('Using production database');
-    dbUrl = 'mongodb://' + process.env.DB_USER + ':' + process.env.DB_PASS + '@ds019886.mlab.com:19886/igetback-db';
+    let env = process.env;
+    dbUrl = `${env.PROD_DB_PREFIX}${env.DB_USER}:${env.DB_PASS}${env.PROD_DB_SUFFIX}`;
 } else {
     console.log('Using dev database');
     dbUrl = 'mongodb://localhost:27017/igetback-db';
 }
+console.log(`Connecting to ${dbUrl}`);
 mongoose.connect(dbUrl);
 
 // set up routes
