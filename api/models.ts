@@ -35,7 +35,7 @@ export class Trip {
 export interface ITrip extends Trip {
     ownerEmail: string;
     maxOtherMembers: Number;
-    tripMemberIds: ObjectIdTs[];
+    tripMemberEmails: string[];
     tripDate: Date;
     tripHour: Number;
     tripQuarterHour: Number;
@@ -48,7 +48,7 @@ export interface ITripModel extends ITrip, mongoose.Document{};
 const tripSchema = new mongoose.Schema({
     ownerEmail: String,
     maxOtherMembers: Number,
-    tripMemberIds: [ObjectIdSchema],
+    tripMemberEmails: [String],
     tripDate: Date,
     tripHour: Number,
     tripQuarterHour: Number,

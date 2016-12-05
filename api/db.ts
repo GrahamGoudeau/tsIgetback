@@ -4,13 +4,17 @@ import * as security from './security';
 import * as mongoose from 'mongoose';
 
 type IUser = models.IUser;
+type ITrip = models.ITrip;
+type ObjectIdTs = models.ObjectIdTs;
 type Either<L, R> = tsmonad.Either<L, R>;
 const Either = tsmonad.Either;
 
 export enum DatabaseErrorMessage {
     USER_EXISTS,
     USER_NOT_FOUND,
-    DB_ERROR
+    DB_ERROR,
+    TRIP_FULL,
+    TRIP_NOT_FOUND
 }
 
 export type DatabaseResult<T> = Either<DatabaseErrorMessage, T>
@@ -154,29 +158,58 @@ export async function getTripsFromAirport(query: FindTripsQuery): Promise<models
     return getTrips(query, models.FromAirport);
 }
 
-enum AddToCampusOrAirport {
-    TO_CAMPUS,
-    TO_AIRPORT
+export enum AddToCampusOrAirport {
+    FROM_CAMPUS,
+    FROM_AIRPORT
 }
 
 async function addNewTripToUser(id: models.ObjectIdTs, userEmail: string, tripKind: AddToCampusOrAirport): Promise<void> {
     const updateObj = {
         '$push': {}
     };
-    updateObj['$push'][tripKind === AddToCampusOrAirport.TO_CAMPUS ? 'tripsFromCampus' : 'tripsFromAirport'] = id;
+    updateObj['$push'][tripKind === AddToCampusOrAirport.FROM_CAMPUS ? 'tripsFromCampus' : 'tripsFromAirport'] = id;
     const searchObj = {
         email: userEmail
     };
+    // TODO: is this variable used?
     const user = await getUserFromEmail({email: userEmail});
+
+    // TODO: what happens if the email is not found?
     const result = await models.User.findOneAndUpdate(searchObj, updateObj, {new: true});
 
    return;
 }
 
 export async function addNewTripFromCampusToUser(id: models.ObjectIdTs, userEmail: string): Promise<void> {
-    return addNewTripToUser(id, userEmail, AddToCampusOrAirport.TO_CAMPUS);
+    return addNewTripToUser(id, userEmail, AddToCampusOrAirport.FROM_CAMPUS);
 }
 
 export async function addNewTripFromAirportToUser(id: models.ObjectIdTs, userEmail: string): Promise<void> {
-    return addNewTripToUser(id, userEmail, AddToCampusOrAirport.TO_AIRPORT);
+    return addNewTripToUser(id, userEmail, AddToCampusOrAirport.FROM_AIRPORT);
+}
+
+export async function addUserToTrip(tripId: ObjectIdTs, emailToAdd: string, tripType: AddToCampusOrAirport): Promise<DatabaseResult<boolean>> {
+    const updateObj = {
+        '$push': {}
+    };
+    updateObj['$push']['tripMemberEmails'] = emailToAdd;
+    const searchObj = {
+        _id: tripId
+    };
+
+    const model: mongoose.Model<models.ITripModel> = tripType === AddToCampusOrAirport.FROM_CAMPUS ? models.FromCampus : models.FromAirport;
+    try {
+        const tripStats = await model.findOne(searchObj, 'maxOtherMembers tripMemberEmails');
+        if (tripStats == null) {
+            return Either.left(DatabaseErrorMessage.TRIP_NOT_FOUND);
+        } else if (tripStats.tripMemberEmails.length + 1 > tripStats.maxOtherMembers) {
+            return Either.left(DatabaseErrorMessage.TRIP_FULL);
+        }
+
+        const result: models.ITripModel = await model.findOneAndUpdate(searchObj, updateObj, { new: true });
+        return Either.right(true);
+    } catch (e) {
+        console.trace('exception saving user to trip:', e);
+        return Either.left(DatabaseErrorMessage.DB_ERROR);
+    }
 }
