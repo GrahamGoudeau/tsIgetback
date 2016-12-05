@@ -1,6 +1,7 @@
 import * as tsmonad from 'tsmonad';
 import * as db from './db';
 import * as utils from './utils';
+import { badRequest, jsonResponse, internalError } from './utils';
 import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
@@ -11,7 +12,7 @@ type IUser = models.IUser;
 export async function handleCreateUser(req: express.Request, res: express.Response): Promise<void> {
     const obj: any = req.body;
     if (!obj) {
-        utils.badRequest(res);
+        badRequest(res);
         return;
     }
 
@@ -23,14 +24,14 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
                                                                        obj.password);
             const success = newUser.caseOf({
                 right: newUser => {
-                    utils.jsonResponse(res, newUser);
+                    jsonResponse(res, newUser);
                     return true;
                 },
                 left: error => {
                     if (error === db.DatabaseErrorMessage.USER_EXISTS) {
-                        utils.badRequest(res, 'email exists');
+                        badRequest(res, 'email exists');
                     } else {
-                        utils.badRequest(res, 'other error');
+                        badRequest(res, 'other error');
                     }
                     return false;
                 }
@@ -38,31 +39,31 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
         } catch (e) {
             const msg = 'exception while creating user';
             console.trace(msg, e);
-            utils.internalError(res, msg);
+            internalError(res, msg);
             return;
         }
     } else {
-        utils.badRequest(res, 'missing fields');
+        badRequest(res, 'missing fields');
     }
 }
 
 export async function handleDelete(req: express.Request, res: express.Response): Promise<void> {
     if (!req.body) {
-        utils.badRequest(res);
+        badRequest(res);
         return;
     }
 
     if (req.body.email) {
         db.deleteUser({email: req.body.email});
     } else {
-        utils.badRequest(res, 'missing email field');
+        badRequest(res, 'missing email field');
     }
 }
 
 export async function handleLogin(req: express.Request, res: express.Response): Promise<void> {
     const obj: any = req.body;
     if (!obj) {
-        utils.badRequest(res);
+        badRequest(res);
         return;
     }
 
@@ -72,7 +73,7 @@ export async function handleLogin(req: express.Request, res: express.Response): 
             const dbResult: DatabaseResult<IUser> = await db.getUserFromEmailAndPassword(query);
             dbResult.caseOf({
                 right: async user => {
-                    utils.jsonResponse(res, {
+                    jsonResponse(res, {
                         authToken: security.buildAuthToken(user.email)
                     });
                     await db.recordLogin({email: user.email});
@@ -81,16 +82,16 @@ export async function handleLogin(req: express.Request, res: express.Response): 
                     if (error === db.DatabaseErrorMessage.USER_NOT_FOUND) {
                         utils.unauthorizedError(res, 'could not find user');
                     } else {
-                        utils.badRequest(res);
+                        badRequest(res);
                     }
                 }
             });
         } catch (e) {
             const msg = 'exception while logging in';
             console.trace(msg, e);
-            utils.internalError(res, msg);
+            internalError(res, msg);
         }
     } else {
-        utils.badRequest(res);
+        badRequest(res);
     }
 }

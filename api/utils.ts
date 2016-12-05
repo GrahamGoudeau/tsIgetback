@@ -4,7 +4,7 @@ import * as security from './security';
 import * as tsmonad from 'tsmonad';
 
 export type InsecureContinuation = (req: express.Request,
-                            res: express.Response) => void;
+                                    res: express.Response) => void;
 
 export type SecureContinuation = (req: express.Request,
                                   res: express.Response,
@@ -196,4 +196,8 @@ export function jsonResponse(res: express.Response, result: any): void {
     };
 
     res.status(200).json(response);
+}
+
+export function successResponse(res: express.Response): void {
+    res.status(200).send();
 }
