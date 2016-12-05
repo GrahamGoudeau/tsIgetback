@@ -4,7 +4,7 @@ import * as trips from './api/trips';
 import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
 import * as utils from './api/utils';
-import { InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
+import { HttpMethod, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
 import * as tsmonad from 'tsmonad';
 
 type Either<L, R> = tsmonad.Either<L, R>;
@@ -47,37 +47,47 @@ const indexBuilder: utils.InsecureRouteBuilder = new utils.InsecureRouteBuilder(
 
 const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user/create', user.handleCreateUser)
     .setIsAjax(true)
-    .setHttpMethod(utils.HttpMethod.POST);
+    .setHttpMethod(HttpMethod.POST);
 
 const userDeleteBuilder: SecureRouteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/delete', user.handleDelete)
     .setIsAjax(true)
-    .setHttpMethod(utils.HttpMethod.DELETE);
+    .setHttpMethod(HttpMethod.DELETE);
 
-const loginBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new utils.InsecureRouteBuilder('/api/user/login', user.handleLogin)
+const loginBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user/login', user.handleLogin)
     .setIsAjax(true)
-    .setHttpMethod(utils.HttpMethod.POST);
+    .setHttpMethod(HttpMethod.POST);
 
-const secureTestBuilder: SecureRouteBuilder = <SecureRouteBuilder>new utils.SecureRouteBuilder('/api/secure', (req, res, token) => {
+const secureTestBuilder: SecureRouteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/secure', (req, res, token) => {
     console.log('testing');
     res.send('in secure');
 }).setIsAjax(true);
 
-const tripFromCampusCreateBuilder = <SecureRouteBuilder>new utils.SecureRouteBuilder('/api/fromCampus/create', trips.handleFromCampusCreate)
+const tripFromCampusCreateBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/create', trips.handleFromCampusCreate)
     .setIsAjax(true)
-    .setHttpMethod(utils.HttpMethod.POST);
+    .setHttpMethod(HttpMethod.POST);
 
-const tripFromAirportCreateBuilder = <SecureRouteBuilder>new utils.SecureRouteBuilder('/api/fromAirport/create', trips.handleFromAirportCreate)
+const tripFromAirportCreateBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/create', trips.handleFromAirportCreate)
     .setIsAjax(true)
-    .setHttpMethod(utils.HttpMethod.POST);
+    .setHttpMethod(HttpMethod.POST);
+
+const fromCampusJoinBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/join', trips.handleJoinTripFromCampus)
+    .setIsAjax(true)
+    .setHttpMethod(HttpMethod.POST);
+
+const fromAirportJoinBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/join', trips.handleJoinTripFromAirport)
+    .setIsAjax(true)
+    .setHttpMethod(HttpMethod.POST);
 
 // construct and set routes
-const indexRoute: utils.InsecureRoute = <InsecureRoute>new utils.InsecureRoute(indexBuilder);
-const createRoute: utils.InsecureRoute = new utils.InsecureRoute(userCreateBuilder);
-const deleteUserRoute: utils.SecureRoute = new utils.SecureRoute(userDeleteBuilder);
-const loginRoute: utils.InsecureRoute = new utils.InsecureRoute(loginBuilder);
-const secureRoute: utils.SecureRoute = new utils.SecureRoute(secureTestBuilder);
-const fromCampusCreateRoute: utils.SecureRoute = new utils.SecureRoute(tripFromCampusCreateBuilder);
-const fromAirportCreateRoute: utils.SecureRoute = new utils.SecureRoute(tripFromAirportCreateBuilder);
+const indexRoute: InsecureRoute = <InsecureRoute>new InsecureRoute(indexBuilder);
+const createRoute: InsecureRoute = new InsecureRoute(userCreateBuilder);
+const deleteUserRoute: SecureRoute = new SecureRoute(userDeleteBuilder);
+const loginRoute: InsecureRoute = new InsecureRoute(loginBuilder);
+const secureRoute: SecureRoute = new SecureRoute(secureTestBuilder);
+const fromCampusCreateRoute: SecureRoute = new SecureRoute(tripFromCampusCreateBuilder);
+const fromAirportCreateRoute: SecureRoute = new SecureRoute(tripFromAirportCreateBuilder);
+const fromCampusJoinRoute: SecureRoute = new SecureRoute(fromCampusJoinBuilder);
+const fromAirportJoinRotue: SecureRoute = new SecureRoute(fromAirportJoinBuilder);
 
 const insecureRoutes = [
     indexRoute,
@@ -89,6 +99,8 @@ const secureRoutes = [
     fromCampusCreateRoute,
     fromAirportCreateRoute,
     deleteUserRoute,
+    fromCampusJoinRoute,
+    fromAirportJoinRotue,
 ];
 
 routeManager.addInsecureRoutes(insecureRoutes);
