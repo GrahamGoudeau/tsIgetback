@@ -9,6 +9,7 @@
 1. Install `node` and `npm` globally
 1. Clone the repo
 1. Run `npm install`
+  * When the installation is finished, it will automatically try to compile the backend Typescript files.  If this build fails with the error message `Variable 'module' must be of type 'NodeModule', but here has type...`, then currently the only known fix is to edit `node_modules/\@types/tsmonad/index.d.ts` (may or may not need the backslash before the `@` character).  Line 682 of that file should be changed to: `declare var module: NodeModule;`.  Then the build should work.
 1. At this point you should be able to compile the backend Typescript with `npm run build`.
   * (You could also install the Typescript compiler globally with `npm install -g typescript`)
 1. In order to run the backend server, you need:
