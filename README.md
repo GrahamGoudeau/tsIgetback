@@ -5,6 +5,7 @@
 1. Get `mongo` installed
   * If you are on a Mac, the easiest way is with `brew install mongodb`, assuming that you have `homebrew` installed.
   * Otherwise I haven't tested the install, and I recommend following the official documentation https://docs.mongodb.com/v3.2/installation/
+  * If you are on Mac OS X, you may need to fix a directory permissions oddity like this: http://stackoverflow.com/a/31616194
 1. Install `node` and `npm` globally
 1. Clone the repo
 1. Run `npm install`
