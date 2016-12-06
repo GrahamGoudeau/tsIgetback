@@ -1,4 +1,3 @@
-import * as tsmonad from 'tsmonad';
 import * as db from './db';
 import * as utils from './utils';
 import { badRequest, jsonResponse, internalError } from './utils';
@@ -10,7 +9,6 @@ import { Validator } from "validator.ts/Validator";
 
 const validator: Validator = new Validator();
 type DatabaseResult<T> = db.DatabaseResult<T>;
-type DatabaseErrorMessage = db.DatabaseErrorMessage;
 type ITrip = models.ITrip;
 type ObjectIdTs = models.ObjectIdTs;
 

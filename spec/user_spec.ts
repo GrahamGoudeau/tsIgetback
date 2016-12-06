@@ -69,7 +69,7 @@ describe('A user', () => {
 
     it('cannot log in if not existing', async (done) => {
         try {
-            const token: AuthToken = await test_utils.login(test_utils.makeString(40), test_utils.makeString(40));
+            await test_utils.login(test_utils.makeString(40), test_utils.makeString(40));
         } catch (e) {
             done();
         }

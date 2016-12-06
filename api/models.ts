@@ -1,6 +1,5 @@
 import * as mongoose from 'mongoose';
-import { Validator } from "validator.ts/Validator";
-import { Contains, NotEmpty, IsInt, IsLength, IsEmail, IsDate } from "validator.ts/decorator/Validation";
+import { NotEmpty, IsInt, IsDate } from "validator.ts/decorator/Validation";
 import { Escape } from "validator.ts/decorator/Sanitization";
 
 export type ObjectIdTs = mongoose.Types.ObjectId;

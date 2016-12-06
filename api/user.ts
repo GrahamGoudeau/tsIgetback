@@ -1,4 +1,3 @@
-import * as tsmonad from 'tsmonad';
 import * as db from './db';
 import * as utils from './utils';
 import { badRequest, jsonResponse, internalError } from './utils';
@@ -22,7 +21,7 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
                                                                        obj.lastName,
                                                                        obj.email,
                                                                        obj.password);
-            const success = newUser.caseOf({
+            newUser.caseOf({
                 right: newUser => {
                     jsonResponse(res, newUser);
                     return true;

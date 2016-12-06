@@ -10,10 +10,6 @@ export type SecureContinuation = (req: express.Request,
                                   res: express.Response,
                                   authToken: security.AuthToken) => void;
 
-type ExpressContinuation = (req: express.Request, res: express.Response) => void;
-
-type Either<L, R> = tsmonad.Either<L, R>;
-
 export enum HttpMethod {
     GET,
     POST,

@@ -4,7 +4,6 @@ import * as security from './security';
 import * as mongoose from 'mongoose';
 
 type IUser = models.IUser;
-type ITrip = models.ITrip;
 type ObjectIdTs = models.ObjectIdTs;
 type Either<L, R> = tsmonad.Either<L, R>;
 const Either = tsmonad.Either;
@@ -85,8 +84,8 @@ export async function createUser(firstName: string, lastName: string, email: str
     return Either.right(await newUser.save());
 }
 
-export async function recordLogin(query: OneUserQuery) {
-    const updated = await models.User.findOneAndUpdate(query, {
+export async function recordLogin(query: OneUserQuery): Promise<void> {
+    await models.User.findOneAndUpdate(query, {
         lastLogin: new Date()
     }, { new: true });
 }
@@ -171,13 +170,13 @@ async function addNewTripToUser(id: models.ObjectIdTs, userEmail: string, tripKi
     const searchObj = {
         email: userEmail
     };
-    // TODO: is this variable used?
-    const user = await getUserFromEmail({email: userEmail});
 
     // TODO: what happens if the email is not found?
     const result = await models.User.findOneAndUpdate(searchObj, updateObj, {new: true});
 
-   return;
+    if (result == null) {
+        throw new Error('Could not find trip');
+    }
 }
 
 export async function addNewTripFromCampusToUser(id: models.ObjectIdTs, userEmail: string): Promise<void> {
@@ -206,7 +205,7 @@ export async function addUserToTrip(tripId: ObjectIdTs, emailToAdd: string, trip
             return Either.left(DatabaseErrorMessage.TRIP_FULL);
         }
 
-        const result: models.ITripModel = await model.findOneAndUpdate(searchObj, updateObj, { new: true });
+        await model.findOneAndUpdate(searchObj, updateObj, { new: true });
         return Either.right(true);
     } catch (e) {
         console.trace('exception saving user to trip:', e);

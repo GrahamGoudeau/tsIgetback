@@ -5,7 +5,9 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "inlineSourceMap": true,
-        "noEmitOnError": true
+        "noEmitOnError": true,
+        "noUnusedLocals": true,
+        "pretty": true
     },
     "exclude": [
         "node_modules",

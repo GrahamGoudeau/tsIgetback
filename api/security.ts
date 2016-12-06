@@ -1,6 +1,5 @@
 import * as crypto from 'crypto';
 import * as tsmonad from 'tsmonad';
-import { IUser } from './models';
 import * as db from './db';
 
 const Maybe = tsmonad.Maybe;

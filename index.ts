@@ -5,10 +5,6 @@ import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
 import * as utils from './api/utils';
 import { HttpMethod, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
-import * as tsmonad from 'tsmonad';
-
-type Either<L, R> = tsmonad.Either<L, R>;
-const Either = tsmonad.Either;
 
 const app: express.Express = express();
 
@@ -21,7 +17,9 @@ const airportCodesFile: string = `${__dirname}/data/airport-codes.dat`;
 const collegesFile: string = `${__dirname}/data/colleges.dat`;
 
 const airportCodes: string[] = utils.readLines(airportCodesFile);
+console.log(`Loaded ${airportCodes.length} airorts`);
 const colleges: string[] = utils.readLines(collegesFile);
+console.log(`Loaded ${colleges.length} colleges`);
 
 // connect to the db
 let dbUrl: string;
@@ -57,11 +55,6 @@ const loginBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRou
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
 
-const secureTestBuilder: SecureRouteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/secure', (req, res, token) => {
-    console.log('testing');
-    res.send('in secure');
-}).setIsAjax(true);
-
 const tripFromCampusCreateBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/create', trips.handleFromCampusCreate)
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
@@ -83,7 +76,6 @@ const indexRoute: InsecureRoute = <InsecureRoute>new InsecureRoute(indexBuilder)
 const createRoute: InsecureRoute = new InsecureRoute(userCreateBuilder);
 const deleteUserRoute: SecureRoute = new SecureRoute(userDeleteBuilder);
 const loginRoute: InsecureRoute = new InsecureRoute(loginBuilder);
-const secureRoute: SecureRoute = new SecureRoute(secureTestBuilder);
 const fromCampusCreateRoute: SecureRoute = new SecureRoute(tripFromCampusCreateBuilder);
 const fromAirportCreateRoute: SecureRoute = new SecureRoute(tripFromAirportCreateBuilder);
 const fromCampusJoinRoute: SecureRoute = new SecureRoute(fromCampusJoinBuilder);
@@ -109,5 +101,5 @@ routeManager.addSecureRoutes(secureRoutes);
 
 // run
 const port = process.env.PORT || 5000;
-const server = app.listen(port);
+app.listen(port);
 console.log(`Listening on port ${port}`);
