@@ -77,8 +77,10 @@ export async function createUser(firstName: string, lastName: string, email: str
         passwordHash: hashPassword(email, password),
         email: email,
         verified: false,
-        tripsFromCampus: [],
-        tripsFromAirport: []
+        ownedTripsFromCampus: [],
+        ownedTripsFromAirport: [],
+        memberTripsFromCampus: [],
+        memberTripsFromAirport: []
     };
     const newUser: models.IUserModel = new models.User(newUserDetails);
     return Either.right(await newUser.save());
@@ -166,7 +168,7 @@ async function addNewTripToUser(id: models.ObjectIdTs, userEmail: string, tripKi
     const updateObj = {
         '$push': {}
     };
-    updateObj['$push'][tripKind === AddToCampusOrAirport.FROM_CAMPUS ? 'tripsFromCampus' : 'tripsFromAirport'] = id;
+    updateObj['$push'][tripKind === AddToCampusOrAirport.FROM_CAMPUS ? 'ownedTripsFromCampus' : 'ownedTripsFromAirport'] = id;
     const searchObj = {
         email: userEmail
     };
@@ -211,4 +213,33 @@ export async function addUserToTrip(tripId: ObjectIdTs, emailToAdd: string, trip
         console.trace('exception saving user to trip:', e);
         return Either.left(DatabaseErrorMessage.DB_ERROR);
     }
+}
+
+export async function deleteTrip(tripId: ObjectIdTs, tripType: AddToCampusOrAirport): Promise<DatabaseResult<boolean>> {
+    const isCampus = tripType === AddToCampusOrAirport.FROM_CAMPUS;
+    let model: mongoose.Model<models.ITripModel>;
+    let ownedField: string;
+    let memberField: string;
+    if (isCampus) {
+        model = models.FromCampus;
+        ownedField = 'ownedTripsFromCampus';
+        memberField = 'memberTripsFromCampus';
+    } else {
+        model = models.FromAirport;
+        ownedField = 'ownedTripsFromAirport';
+        memberField = 'memberTripsFromAirport';
+    }
+
+    const idQuery = { _id: tripId };
+    const tripExists: boolean = (await model.count(idQuery)) != 0;
+    if (!tripExists) {
+        return Either.left(DatabaseErrorMessage.TRIP_NOT_FOUND);
+    }
+
+    const pullObj = { $pullAll: {}};
+    pullObj.$pullAll[ownedField] = [tripId];
+    pullObj.$pullAll[memberField] = [tripId];
+    await models.User.update({}, pullObj, { multi: true });
+    const result = model.remove({_id: tripId});
+    return Either.right(result != null);
 }

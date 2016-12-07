@@ -67,8 +67,10 @@ export interface IUser {
     passwordHash: string,
     email: string,
     verified: boolean,
-    tripsFromCampus: ObjectIdTs[],
-    tripsFromAirport: ObjectIdTs[]
+    ownedTripsFromCampus: ObjectIdTs[],
+    ownedTripsFromAirport: ObjectIdTs[],
+    memberTripsFromCampus: ObjectIdTs[],
+    memberTripsFromAirport: ObjectIdTs[]
 }
 
 export interface IUserModel extends IUser, mongoose.Document{};
@@ -81,8 +83,10 @@ const userSchema = new mongoose.Schema({
     passwordHash: String,
     email: String,
     verified: Boolean,
-    tripsFromCampus: [ObjectIdSchema],
-    tripsFromAirport: [ObjectIdSchema]
+    ownedTripsFromCampus: [ObjectIdSchema],
+    ownedTripsFromAirport: [ObjectIdSchema],
+    memberTripsFromCampus: [ObjectIdSchema],
+    memberTripsFromAirport: [ObjectIdSchema]
 });
 
 export const User = mongoose.model<IUserModel>("user", userSchema, "users");
