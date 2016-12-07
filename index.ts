@@ -4,6 +4,7 @@ import * as trips from './api/trips';
 import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
 import * as utils from './api/utils';
+import * as db from './api/db';
 import { HttpMethod, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
 
 const app: express.Express = express();
@@ -71,15 +72,33 @@ const fromAirportJoinBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
 
+const fromCampusDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/delete', (req, res, token) => {
+    trips.handleDeleteTrip(req, res, token, db.AddToCampusOrAirport.FROM_CAMPUS);
+})
+    .setIsAjax(true)
+    .setHttpMethod(HttpMethod.DELETE);
+
+const fromAirportDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/delete', (req, res, token) => {
+    trips.handleDeleteTrip(req, res, token, db.AddToCampusOrAirport.FROM_AIRPORT);
+})
+    .setIsAjax(true)
+    .setHttpMethod(HttpMethod.DELETE);
+
+const accountBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/account', user.handleGetAccount)
+    .setIsAjax(true);
+
 // construct and set routes
 const indexRoute: InsecureRoute = <InsecureRoute>new InsecureRoute(indexBuilder);
 const createRoute: InsecureRoute = new InsecureRoute(userCreateBuilder);
 const deleteUserRoute: SecureRoute = new SecureRoute(userDeleteBuilder);
+const accountRoute: SecureRoute = new SecureRoute(accountBuilder);
 const loginRoute: InsecureRoute = new InsecureRoute(loginBuilder);
 const fromCampusCreateRoute: SecureRoute = new SecureRoute(tripFromCampusCreateBuilder);
 const fromAirportCreateRoute: SecureRoute = new SecureRoute(tripFromAirportCreateBuilder);
 const fromCampusJoinRoute: SecureRoute = new SecureRoute(fromCampusJoinBuilder);
 const fromAirportJoinRotue: SecureRoute = new SecureRoute(fromAirportJoinBuilder);
+const fromCampusDeleteRotue: SecureRoute = new SecureRoute(fromCampusDeleteBuider);
+const fromAirportDeleteRotue: SecureRoute = new SecureRoute(fromAirportDeleteBuider);
 
 const insecureRoutes = [
     indexRoute,
@@ -91,8 +110,11 @@ const secureRoutes = [
     fromCampusCreateRoute,
     fromAirportCreateRoute,
     deleteUserRoute,
+    accountRoute,
     fromCampusJoinRoute,
     fromAirportJoinRotue,
+    fromCampusDeleteRotue,
+    fromAirportDeleteRotue
 ];
 
 routeManager.addInsecureRoutes(insecureRoutes);
