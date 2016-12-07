@@ -94,3 +94,11 @@ export async function handleLogin(req: express.Request, res: express.Response): 
         badRequest(res);
     }
 }
+
+export async function handleGetAccount(req: express.Request, res: express.Response, token: security.AuthToken): Promise<void> {
+    const userResult = await db.getUserFromEmail({email: token.email});
+    userResult.caseOf({
+        left: e => badRequest(res, 'user not found'),
+        right: user => jsonResponse(res, user)
+    });
+}
