@@ -1,6 +1,6 @@
 import * as db from './db';
 import * as utils from './utils';
-import { badRequest, jsonResponse, internalError } from './utils';
+import { badRequest, jsonResponse, internalError, successResponse } from './utils';
 import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
@@ -111,6 +111,39 @@ export async function handleJoinTripFromAirport(req: express.Request,
     await handleJoinTrip(req, res, authToken, db.AddToCampusOrAirport.FROM_AIRPORT);
 }
 
+export async function handleDeleteTrip(req: express.Request,
+                                res: express.Response,
+                                authToken: security.AuthToken,
+                                tripType: db.AddToCampusOrAirport
+                               ): Promise<void> {
+    const obj: any = req.body;
+    if (!obj || !obj.tripId) {
+        badRequest(res, 'missing fields');
+        return;
+    }
+
+    let tripId: ObjectIdTs;
+    try {
+        tripId = mongoose.Types.ObjectId(obj.tripId);
+    } catch (e) {
+        console.trace('failed to convert to mongo object ID', obj.tripId);
+        badRequest(res, 'bad trip ID');
+        return;
+    }
+
+    try {
+        const success = db.deleteTrip(tripId, tripType);
+        if (!success) {
+            internalError(res, 'could not delete trip');
+        } else {
+            successResponse(res);
+        }
+    } catch (e) {
+        console.trace('failed to delete trip', tripType, e);
+        internalError(res, 'exception while deleting trip');
+    }
+}
+
 async function handleJoinTrip(req: express.Request,
                               res: express.Response,
                               authToken: security.AuthToken,
@@ -119,6 +152,7 @@ async function handleJoinTrip(req: express.Request,
     const obj: any = req.body;
     if (!obj || !obj.tripId) {
         badRequest(res, 'missing fields');
+        return;
     }
 
     let tripId: ObjectIdTs;
@@ -149,7 +183,7 @@ async function handleJoinTrip(req: express.Request,
             },
             right: success => {
                 if (success) {
-                    utils.successResponse(res);
+                    successResponse(res);
                 } else {
                     console.trace('unexpected error');
                     utils.internalError(res);
