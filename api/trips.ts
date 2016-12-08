@@ -116,17 +116,11 @@ export async function handleDeleteTrip(req: express.Request,
                                 authToken: security.AuthToken,
                                 tripType: db.AddToCampusOrAirport
                                ): Promise<void> {
-    const obj: any = req.body;
-    if (!obj || !obj.tripId) {
-        badRequest(res, 'missing fields');
-        return;
-    }
-
     let tripId: ObjectIdTs;
     try {
-        tripId = mongoose.Types.ObjectId(obj.tripId);
+        tripId = mongoose.Types.ObjectId(req.params.tripId);
     } catch (e) {
-        console.trace('failed to convert to mongo object ID', obj.tripId);
+        console.trace('failed to convert to mongo object ID', req.params.tripId);
         badRequest(res, 'bad trip ID');
         return;
     }
