@@ -132,12 +132,19 @@ export async function handleDeleteTrip(req: express.Request,
     }
 
     try {
-        const success = db.deleteTrip(tripId, authToken.email, tripType);
-        if (!success) {
-            internalError(res, 'could not delete trip');
-        } else {
-            successResponse(res);
-        }
+        const successResult: DatabaseResult<boolean> = await db.deleteTrip(tripId, authToken.email, tripType);
+        successResult.caseOf({
+            left: e => {
+                badRequest(res, 'could not delete trip');
+            },
+            right: success => {
+                if (!success) {
+                    internalError(res, 'could not delete trip');
+                } else {
+                    successResponse(res);
+                }
+            }
+        });
     } catch (e) {
         console.trace('failed to delete trip', tripType, e);
         internalError(res, 'exception while deleting trip');
