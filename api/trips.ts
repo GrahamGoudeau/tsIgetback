@@ -132,7 +132,7 @@ export async function handleDeleteTrip(req: express.Request,
     }
 
     try {
-        const success = db.deleteTrip(tripId, tripType);
+        const success = db.deleteTrip(tripId, authToken.email, tripType);
         if (!success) {
             internalError(res, 'could not delete trip');
         } else {

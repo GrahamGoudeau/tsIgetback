@@ -215,7 +215,7 @@ export async function addUserToTrip(tripId: ObjectIdTs, emailToAdd: string, trip
     }
 }
 
-export async function deleteTrip(tripId: ObjectIdTs, tripType: AddToCampusOrAirport): Promise<DatabaseResult<boolean>> {
+export async function deleteTrip(tripId: ObjectIdTs, ownerEmail: string, tripType: AddToCampusOrAirport): Promise<DatabaseResult<boolean>> {
     const isCampus = tripType === AddToCampusOrAirport.FROM_CAMPUS;
     let model: mongoose.Model<models.ITripModel>;
     let ownedField: string;
@@ -230,8 +230,8 @@ export async function deleteTrip(tripId: ObjectIdTs, tripType: AddToCampusOrAirp
         memberField = 'memberTripsFromAirport';
     }
 
-    const idQuery = { _id: tripId };
-    const tripExists: boolean = (await model.count(idQuery)) != 0;
+    const query = { _id: tripId, ownerEmail: ownerEmail };
+    const tripExists: boolean = (await model.count(query)) != 0;
     if (!tripExists) {
         return Either.left(DatabaseErrorMessage.TRIP_NOT_FOUND);
     }
@@ -240,6 +240,6 @@ export async function deleteTrip(tripId: ObjectIdTs, tripType: AddToCampusOrAirp
     pullObj.$pullAll[ownedField] = [tripId];
     pullObj.$pullAll[memberField] = [tripId];
     await models.User.update({}, pullObj, { multi: true });
-    const result = model.remove({_id: tripId});
+    const result = model.remove(query);
     return Either.right(result != null);
 }
