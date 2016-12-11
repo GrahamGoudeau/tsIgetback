@@ -20,4 +20,6 @@
   * And if you are developing, you may like to do:
     * `tsc -w` (assuming the compiler is globally installed, or do `npm run watch` if it is not) to have the compiler watch for changes to `*.ts` files.
 1. With the server running, you should be able to run the tests with `npm run test`.
-1. If you would like to use `tsc` or `tsc -w` instead of `npm run build` and `npm run watch` respectively, do `npm install -g typescript`
+1. Global installs you may want to do:
+  * `npm install -g typescript` - to make the Typescript compiler available globally, rather than going through npm (i.e. `npm run build`)
+  * `npm install -g webpack` - to make Webpack available globally; used for building the front end
