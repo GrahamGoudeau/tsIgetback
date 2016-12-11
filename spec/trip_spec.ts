@@ -94,24 +94,16 @@ describe('The trip endpoints', () => {
 
         expect(userFromCampusBeforeDelete.ownedTripsFromCampus.indexOf(resFromCampus.data._id)).not.toBe(-1);
         const delResCampus = await WebRequest.json<IGetBackResponse>(
-            makeEndpoint('fromCampus/delete'),
+            makeEndpoint(`fromCampus/delete/${resFromCampus.data._id}`),
             Object.assign({}, {
-                method: 'DELETE',
-                json: true,
-                body: {
-                    tripId: resFromCampus.data._id
-                }
+                method: 'DELETE'
             }, reqOpts1)
         );
         const resFromAirport = await createValidTrip('fromAirport', reqOpts1);
         const delResAirport = await WebRequest.json<IGetBackResponse>(
-            makeEndpoint('fromAirport/delete'),
+            makeEndpoint(`fromAirport/delete/${resFromAirport.data._id}`),
             Object.assign({}, {
-                method: 'DELETE',
-                json: true,
-                body: {
-                    tripId: resFromAirport.data._id
-                }
+                method: 'DELETE'
             }, reqOpts1)
         );
 

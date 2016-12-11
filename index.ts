@@ -72,13 +72,13 @@ const fromAirportJoinBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
 
-const fromCampusDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/delete', (req, res, token) => {
+const fromCampusDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/delete/:tripId', (req, res, token) => {
     trips.handleDeleteTrip(req, res, token, db.AddToCampusOrAirport.FROM_CAMPUS);
 })
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.DELETE);
 
-const fromAirportDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/delete', (req, res, token) => {
+const fromAirportDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/delete/:tripId', (req, res, token) => {
     trips.handleDeleteTrip(req, res, token, db.AddToCampusOrAirport.FROM_AIRPORT);
 })
     .setIsAjax(true)
