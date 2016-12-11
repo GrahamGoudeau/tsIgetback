@@ -3,6 +3,9 @@ import * as express from 'express';
 import * as security from './security';
 import * as tsmonad from 'tsmonad';
 
+export const DOMAIN_NAME: string = 'www.igetback.at';
+export const VERIFY_ENDPOINT: string = 'verifyEmail';
+
 export type InsecureContinuation = (req: express.Request,
                                     res: express.Response) => void;
 

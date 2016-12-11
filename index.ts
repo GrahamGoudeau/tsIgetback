@@ -87,6 +87,8 @@ const fromAirportDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api
 const accountBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/account', user.handleGetAccount)
     .setIsAjax(true);
 
+const verifyUserBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder(`/${utils.VERIFY_ENDPOINT}/:recordId`, user.handleVerify);
+
 // construct and set routes
 const indexRoute: InsecureRoute = <InsecureRoute>new InsecureRoute(indexBuilder);
 const createRoute: InsecureRoute = new InsecureRoute(userCreateBuilder);
@@ -96,14 +98,16 @@ const loginRoute: InsecureRoute = new InsecureRoute(loginBuilder);
 const fromCampusCreateRoute: SecureRoute = new SecureRoute(tripFromCampusCreateBuilder);
 const fromAirportCreateRoute: SecureRoute = new SecureRoute(tripFromAirportCreateBuilder);
 const fromCampusJoinRoute: SecureRoute = new SecureRoute(fromCampusJoinBuilder);
-const fromAirportJoinRotue: SecureRoute = new SecureRoute(fromAirportJoinBuilder);
-const fromCampusDeleteRotue: SecureRoute = new SecureRoute(fromCampusDeleteBuider);
-const fromAirportDeleteRotue: SecureRoute = new SecureRoute(fromAirportDeleteBuider);
+const fromAirportJoinRoute: SecureRoute = new SecureRoute(fromAirportJoinBuilder);
+const fromCampusDeleteRoute: SecureRoute = new SecureRoute(fromCampusDeleteBuider);
+const fromAirportDeleteRoute: SecureRoute = new SecureRoute(fromAirportDeleteBuider);
+const verifyUserRoute: InsecureRoute = new InsecureRoute(verifyUserBuilder);
 
 const insecureRoutes = [
     indexRoute,
     createRoute,
     loginRoute,
+    verifyUserRoute,
 ];
 
 const secureRoutes = [
@@ -112,9 +116,9 @@ const secureRoutes = [
     deleteUserRoute,
     accountRoute,
     fromCampusJoinRoute,
-    fromAirportJoinRotue,
-    fromCampusDeleteRotue,
-    fromAirportDeleteRotue
+    fromAirportJoinRoute,
+    fromCampusDeleteRoute,
+    fromAirportDeleteRoute
 ];
 
 routeManager.addInsecureRoutes(insecureRoutes);

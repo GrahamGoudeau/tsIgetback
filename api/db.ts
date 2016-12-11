@@ -10,29 +10,12 @@ const Either = tsmonad.Either;
 
 export enum DatabaseErrorMessage {
     USER_EXISTS,
-    USER_NOT_FOUND,
+    NOT_FOUND,
     DB_ERROR,
     TRIP_FULL,
-    TRIP_NOT_FOUND
 }
 
 export type DatabaseResult<T> = Either<DatabaseErrorMessage, T>
-
-export class DatabaseError extends Error {
-    constructor(public message: string, public errorValue: DatabaseErrorMessage) {
-        super(message);
-    }
-
-    static userExists(): DatabaseError {
-        return new DatabaseError('user exists', DatabaseErrorMessage.USER_EXISTS);
-    }
-
-    static userNotFound(): DatabaseError {
-        return new DatabaseError('user not found', DatabaseErrorMessage.USER_NOT_FOUND);
-    }
-}
-
-export type DbResult<T> = Either<DatabaseError, T>
 
 export interface OneUserQuery {
     email: string
@@ -92,6 +75,14 @@ export async function recordLogin(query: OneUserQuery): Promise<void> {
     }, { new: true });
 }
 
+export async function verifyUser(query: OneUserQuery): Promise<void> {
+    await models.User.update(query, {
+        $set: {
+            verified: true
+        }
+    });
+}
+
 export async function deleteUser(query: OneUserQuery): Promise<void> {
     await models.User.remove(query);
     return;
@@ -105,7 +96,7 @@ export async function doesUserExist(query: OneUserQuery): Promise<boolean> {
 export async function getUserFromEmail(query: OneUserQuery): Promise<DatabaseResult<IUser>> {
     const existingUser = await models.User.findOne(query);
     if (existingUser == null) {
-        return Either.left(DatabaseErrorMessage.USER_NOT_FOUND);
+        return Either.left(DatabaseErrorMessage.NOT_FOUND);
     }
 
     return Either.right(existingUser);
@@ -118,7 +109,7 @@ export async function getUserFromEmailAndPassword(query: UserPasswordQuery): Pro
     };
     const user = await models.User.findOne(dbQuery);
     if (user == null) {
-        return Either.left(DatabaseErrorMessage.USER_NOT_FOUND);
+        return Either.left(DatabaseErrorMessage.NOT_FOUND);
     }
 
     return Either.right(user);
@@ -202,7 +193,7 @@ export async function addUserToTrip(tripId: ObjectIdTs, emailToAdd: string, trip
     try {
         const tripStats = await model.findOne(searchObj, 'maxOtherMembers tripMemberEmails');
         if (tripStats == null) {
-            return Either.left(DatabaseErrorMessage.TRIP_NOT_FOUND);
+            return Either.left(DatabaseErrorMessage.NOT_FOUND);
         } else if (tripStats.tripMemberEmails.length + 1 > tripStats.maxOtherMembers) {
             return Either.left(DatabaseErrorMessage.TRIP_FULL);
         }
@@ -213,6 +204,33 @@ export async function addUserToTrip(tripId: ObjectIdTs, emailToAdd: string, trip
         console.trace('exception saving user to trip:', e);
         return Either.left(DatabaseErrorMessage.DB_ERROR);
     }
+}
+
+export async function createVerificationRecord(email: string): Promise<ObjectIdTs> {
+    const expirationDate: Date = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 1);
+
+    const record: models.IUserVerificationRecordModel = await models.UserVerificationRecord.create({
+        email: email,
+        expirationDate: expirationDate
+    });
+    return record._id;
+}
+
+export async function getVerificationRecord(id: string): Promise<DatabaseResult<models.IUserVerificationRecord>> {
+    let recordId: ObjectIdTs;
+    try {
+        recordId = mongoose.Types.ObjectId(id);
+    } catch (e) {
+        return Either.left(DatabaseErrorMessage.DB_ERROR);
+    }
+
+    const rec: models.IUserVerificationRecordModel = await models.UserVerificationRecord.findById(recordId);
+    if (rec == null) {
+        return Either.left(DatabaseErrorMessage.NOT_FOUND);
+    }
+
+    return Either.right(rec);
 }
 
 export async function deleteTrip(tripId: ObjectIdTs, ownerEmail: string, tripType: AddToCampusOrAirport): Promise<DatabaseResult<boolean>> {
@@ -233,7 +251,7 @@ export async function deleteTrip(tripId: ObjectIdTs, ownerEmail: string, tripTyp
     const query = { _id: tripId, ownerEmail: ownerEmail };
     const tripExists: boolean = (await model.count(query)) != 0;
     if (!tripExists) {
-        return Either.left(DatabaseErrorMessage.TRIP_NOT_FOUND);
+        return Either.left(DatabaseErrorMessage.NOT_FOUND);
     }
 
     const pullObj = { $pullAll: {}};

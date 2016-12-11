@@ -173,7 +173,7 @@ async function handleJoinTrip(req: express.Request,
                     case db.DatabaseErrorMessage.TRIP_FULL:
                         badRequest(res, 'trip full');
                         break;
-                    case db.DatabaseErrorMessage.TRIP_NOT_FOUND:
+                    case db.DatabaseErrorMessage.NOT_FOUND:
                         badRequest(res, 'unknown trip');
                         break;
                     default:

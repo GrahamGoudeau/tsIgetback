@@ -38,7 +38,7 @@ export async function createUser(userPassword: string): Promise<models.IUser> {
                 password: userPassword
             }
         });
-    return newUserResponse.data;
+    return newUserResponse.data.newUser;
 }
 
 export async function login(email: string, password: string): Promise<AuthToken> {
