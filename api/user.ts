@@ -22,11 +22,15 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
                                                                        obj.email,
                                                                        obj.password);
             newUser.caseOf({
-                right: newUser => {
-                    jsonResponse(res, newUser);
+                right: async newUser => {
+                    const emailSendSuccess = await security.sendVerificationEmail(newUser.email);
+                    jsonResponse(res, {
+                        newUser: newUser,
+                        emailSendSuccess: emailSendSuccess
+                    });
                     return true;
                 },
-                left: error => {
+                left: async error => {
                     if (error === db.DatabaseErrorMessage.USER_EXISTS) {
                         badRequest(res, 'email exists');
                     } else {
@@ -72,13 +76,17 @@ export async function handleLogin(req: express.Request, res: express.Response): 
             const dbResult: DatabaseResult<IUser> = await db.getUserFromEmailAndPassword(query);
             dbResult.caseOf({
                 right: async user => {
-                    jsonResponse(res, {
-                        authToken: security.buildAuthToken(user.email)
-                    });
-                    await db.recordLogin({email: user.email});
+                    if (user.verified) {
+                        await db.recordLogin({email: user.email});
+                        jsonResponse(res, {
+                            authToken: security.buildAuthToken(user.email)
+                        });
+                    } else {
+                        badRequest(res, 'user not verified');
+                    }
                 },
                 left: async error => {
-                    if (error === db.DatabaseErrorMessage.USER_NOT_FOUND) {
+                    if (error === db.DatabaseErrorMessage.NOT_FOUND) {
                         utils.unauthorizedError(res, 'could not find user');
                     } else {
                         badRequest(res);
@@ -100,5 +108,16 @@ export async function handleGetAccount(req: express.Request, res: express.Respon
     userResult.caseOf({
         left: e => badRequest(res, 'user not found'),
         right: user => jsonResponse(res, user)
+    });
+}
+
+export async function handleVerify(req: express.Request, res: express.Response): Promise<void> {
+    const recResult: db.DatabaseResult<models.IUserVerificationRecord> = await db.getVerificationRecord(req.params.tripId);
+    await recResult.caseOf({
+        left: async e => badRequest(res, 'bad verification id'),
+        right: async rec => {
+            await db.verifyUser({email: rec.email})
+            res.redirect('/login');
+        }
     });
 }

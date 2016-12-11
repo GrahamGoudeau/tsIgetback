@@ -56,7 +56,7 @@ describe('A user', () => {
             });
         expect(newUserResponse.data == null).toBe(false);
         expect(newUserResponse.error == null).toBe(true);
-        expect(newUserResponse.data.email).toBe(userEmail);
+        expect(newUserResponse.data.newUser.email).toBe(userEmail);
         userIds.push(newUserResponse.data._id);
         done();
     });
