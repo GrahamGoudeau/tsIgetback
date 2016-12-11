@@ -9,17 +9,27 @@ import * as WebRequest from 'web-request';
 */
 
 describe('The trip endpoints', () => {
-    let globalUser: models.IUser;
-    let globalPassword: string;
-    let reqOpts;
+    let globalUser1: models.IUser;
+    let globalPassword1: string;
+    let reqOpts1;
+    let globalUser2: models.IUser;
+    let globalPassword2: string;
+    let reqOpts2;
     beforeAll( async (done) => {
-        globalPassword = makeString(20);
+        globalPassword1 = makeString(20);
+        globalPassword2 = makeString(20);
         try {
-            globalUser = await test_utils.createUser(globalPassword);
-            const token = await test_utils.login(globalUser.email, globalPassword);
-            reqOpts = reqOpts || {};
-            reqOpts['headers'] = {
-                'Cookie': `IgetbackAuth=${token}`
+            globalUser1 = await test_utils.createUser(globalPassword1);
+            globalUser2 = await test_utils.createUser(globalPassword2);
+            const token1 = await test_utils.login(globalUser1.email, globalPassword1);
+            const token2 = await test_utils.login(globalUser2.email, globalPassword2);
+            reqOpts1 = reqOpts1 || {};
+            reqOpts1['headers'] = {
+                'Cookie': `IgetbackAuth=${token1}`
+            };
+            reqOpts2 = reqOpts2 || {};
+            reqOpts2['headers'] = {
+                'Cookie': `IgetbackAuth=${token2}`
             };
             done();
         } catch (e) {
@@ -60,7 +70,7 @@ describe('The trip endpoints', () => {
             tripQuarterHour: 45,
             college: 'Tufts University',
             airport: 'Boston,MA|BOS'
-        }, reqOpts);
+        }, reqOpts1);
         const resFromAirport: IGetBackResponse = await createTrip('fromCampus', {
             tripName: makeString(20),
             tripDate: new Date(),
@@ -69,7 +79,7 @@ describe('The trip endpoints', () => {
             tripQuarterHour: 45,
             college: 'Tufts University',
             airport: 'Boston,MA|BOS'
-        }, reqOpts);
+        }, reqOpts1);
 
         expect(resFromCampus.error == null).toBe(true);
         expect(resFromCampus.data.tripMemberEmails.length).toBe(0);
@@ -79,8 +89,8 @@ describe('The trip endpoints', () => {
     });
 
     it('can delete both kinds of trips', async (done) => {
-        const resFromCampus = await createValidTrip('fromCampus', reqOpts);
-        const userFromCampusBeforeDelete: models.IUser = await test_utils.getUser(reqOpts);
+        const resFromCampus = await createValidTrip('fromCampus', reqOpts1);
+        const userFromCampusBeforeDelete: models.IUser = await test_utils.getUser(reqOpts1);
 
         expect(userFromCampusBeforeDelete.ownedTripsFromCampus.indexOf(resFromCampus.data._id)).not.toBe(-1);
         const delResCampus = await WebRequest.json<IGetBackResponse>(
@@ -91,9 +101,9 @@ describe('The trip endpoints', () => {
                 body: {
                     tripId: resFromCampus.data._id
                 }
-            }, reqOpts)
+            }, reqOpts1)
         );
-        const resFromAirport = await createValidTrip('fromAirport', reqOpts);
+        const resFromAirport = await createValidTrip('fromAirport', reqOpts1);
         const delResAirport = await WebRequest.json<IGetBackResponse>(
             makeEndpoint('fromAirport/delete'),
             Object.assign({}, {
@@ -102,15 +112,42 @@ describe('The trip endpoints', () => {
                 body: {
                     tripId: resFromAirport.data._id
                 }
-            }, reqOpts)
+            }, reqOpts1)
         );
 
         // undefined if everything went okay
         expect(delResCampus).toBe(undefined);
         expect(delResAirport).toBe(undefined);
 
-        const userFromCampusAfterDelete: models.IUser = await test_utils.getUser(reqOpts);
+        const userFromCampusAfterDelete: models.IUser = await test_utils.getUser(reqOpts1);
         expect(userFromCampusAfterDelete.ownedTripsFromCampus.indexOf(resFromCampus.data._id)).toBe(-1);
         done();
     });
+
+    it('cannot delete trips that it does not own', async (done) => {
+        const res = await createValidTrip('fromCampus', reqOpts1);
+        const userFromCampusBeforeDelete1: models.IUser = await test_utils.getUser(reqOpts1);
+        expect(userFromCampusBeforeDelete1.ownedTripsFromCampus.indexOf(res.data._id)).not.toBe(-1);
+
+        try {
+            const delRes = await WebRequest.json<IGetBackResponse>(
+                makeEndpoint('fromCampus/delete'),
+                Object.assign({}, {
+                    method: 'DELETE',
+                    json: true,
+                    body: {
+                        tripId: res.data._id
+                    }
+                }, reqOpts2)
+            );
+            expect(delRes).not.toBeUndefined();
+            const userFromCampusAfterDelete1: models.IUser = await test_utils.getUser(reqOpts1);
+            expect(userFromCampusAfterDelete1.ownedTripsFromCampus.indexOf(res.data._id)).not.toBe(-1);
+            done();
+        } catch (e) {
+            console.trace(e);
+            fail();
+        }
+    });
+
 });
