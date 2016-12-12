@@ -5,6 +5,7 @@ import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
 import * as utils from './api/utils';
 import * as db from './api/db';
+import * as path from 'path';
 import { HttpMethod, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
 
 const app: express.Express = express();
@@ -12,6 +13,8 @@ const app: express.Express = express();
 // app configuration must appear before routes are set
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+const clientDir: string = `${__dirname}/../client`;
+app.use(express.static(clientDir));
 
 // load data files into memory
 const airportCodesFile: string = `${__dirname}/data/airport-codes.dat`;
@@ -39,11 +42,6 @@ mongoose.connect(dbUrl);
 const routeManager = new utils.RouteManager(app);
 
 // route builders
-const indexBuilder: utils.InsecureRouteBuilder = new utils.InsecureRouteBuilder('/', (req, res) => {
-    console.log('responding...');
-    res.json('ok');
-});
-
 const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user/create', user.handleCreateUser)
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
@@ -89,8 +87,13 @@ const accountBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/acc
 
 const verifyUserBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder(`/${utils.VERIFY_ENDPOINT}/:recordId`, user.handleVerify);
 
+const catchAllBuilder: utils.InsecureRouteBuilder = new utils.InsecureRouteBuilder('/*', (req, res) => {
+    res.sendFile(path.resolve(`${clientDir}/index.html`));
+});
+
+
 // construct and set routes
-const indexRoute: InsecureRoute = <InsecureRoute>new InsecureRoute(indexBuilder);
+const catchAllRoute: InsecureRoute = <InsecureRoute>new InsecureRoute(catchAllBuilder);
 const createRoute: InsecureRoute = new InsecureRoute(userCreateBuilder);
 const deleteUserRoute: SecureRoute = new SecureRoute(userDeleteBuilder);
 const accountRoute: SecureRoute = new SecureRoute(accountBuilder);
@@ -104,10 +107,12 @@ const fromAirportDeleteRoute: SecureRoute = new SecureRoute(fromAirportDeleteBui
 const verifyUserRoute: InsecureRoute = new InsecureRoute(verifyUserBuilder);
 
 const insecureRoutes = [
-    indexRoute,
     createRoute,
     loginRoute,
     verifyUserRoute,
+
+    // make sure this is the last array element
+    catchAllRoute,
 ];
 
 const secureRoutes = [
@@ -121,8 +126,10 @@ const secureRoutes = [
     fromAirportDeleteRoute
 ];
 
-routeManager.addInsecureRoutes(insecureRoutes);
 routeManager.addSecureRoutes(secureRoutes);
+
+// make sure we add the routes with the catch-all last
+routeManager.addInsecureRoutes(insecureRoutes);
 
 
 // run
