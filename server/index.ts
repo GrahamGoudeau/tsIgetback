@@ -126,8 +126,10 @@ const secureRoutes = [
     fromAirportDeleteRoute
 ];
 
-routeManager.addInsecureRoutes(insecureRoutes);
 routeManager.addSecureRoutes(secureRoutes);
+
+// make sure we add the routes with the catch-all last
+routeManager.addInsecureRoutes(insecureRoutes);
 
 
 // run
