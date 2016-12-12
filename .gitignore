@@ -1,6 +1,8 @@
 *.js
 *.js.map
 *.swp
+!client/webpack.config.js
+client/dist/*
 .tscache/
 node_modules/
 .env
