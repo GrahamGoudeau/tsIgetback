@@ -1,8 +1,9 @@
-all:
-		tsc
+all: setup run
 
 setup:
-		npm install
+		cd server && npm install &&\
+			cd ../client && npm install &&\
+			webpack
 
-watch:
-		tsc -w
+run:
+		cd server && npm run serve

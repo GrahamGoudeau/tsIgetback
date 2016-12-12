@@ -6,3 +6,4 @@ client/dist/*
 .tscache/
 node_modules/
 .env
+npm-debug.log
