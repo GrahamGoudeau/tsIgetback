@@ -6,25 +6,27 @@ import { Hello } from "./components/Hello";
 import { About } from "./components/About";
 import { Unknown } from "./components/Unknown";
 
-const App = React.createClass({
+class App extends React.Component<undefined, undefined> {
     render() {
         return (
             <div>
+            <h1>App</h1>
+            <ul>
+                <li><Link to="/about">About</Link></li>
+                <li><Link to="/hello">Hello</Link></li>
+            </ul>
             {this.props.children}
             </div>
         )
     }
-})
+};
 ReactDOM.render((
     <Router history={browserHistory}>
         <Route path="/" component={App}>
             <IndexRoute component={Hello} />
-            <Redirect from="about/" to="about"/>
             <Route path="about" component={About}/>
-            <Route path="hello" component={Unknown}>
-                <Route path="/user/:userId" component={Hello}/>
-            </Route>
+            <Route path="hello" component={Hello}/>
             <Route path="*" component={Unknown}/>
         </Route>
     </Router>
-), document.getElementById('igetback-content'))
+), document.getElementById('igetback-content'));
