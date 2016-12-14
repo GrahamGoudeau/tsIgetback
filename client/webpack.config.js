@@ -1,8 +1,10 @@
+var CopyWebpackPlugin = require("copy-webpack-plugin");
+var distDir = __dirname + "/dist";
 module.exports = {
     entry: "./src/index.tsx",
     output: {
         filename: "bundle.js",
-        path: __dirname + "/dist"
+        path: distDir
     },
 
     // Enable sourcemaps for debugging webpack's output.
@@ -10,6 +12,12 @@ module.exports = {
     resolve: {
         extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
     },
+    plugins: [
+        new CopyWebpackPlugin([
+                { from: "node_modules/react/dist/react.min.js", to: distDir },
+                { from: "node_modules/react-dom/dist/react-dom.min.js", to: distDir }
+            ])
+    ],
 
     module: {
         loaders: [
