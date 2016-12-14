@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "heroku-postbuild": "npm install -g webpack",
+    "webpack": "webpack",
+    "webpack:watch": "webpack --watch"
   },
   "author": "",
   "license": "ISC",
@@ -13,12 +16,12 @@
     "@types/react-dom": "^0.14.19",
     "@types/react-router": "^2.0.41",
     "awesome-typescript-loader": "3.0.0-beta.10",
+    "copy-webpack-plugin": "^4.0.1",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
-    "react-router": "^3.0.0"
-  },
-  "devDependencies": {
+    "react-router": "^3.0.0",
     "source-map-loader": "^0.1.5",
-    "typescript": "^2.1.4"
+    "typescript": "^2.1.4",
+    "webpack": "^1.14.0"
   }
 }

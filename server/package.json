@@ -8,20 +8,20 @@
     "dev": "env $(cat .env) nodemon -e js --exec 'ts-node' index.ts",
     "build": "tsc",
     "watch": "tsc -w",
-    "postinstall": "python setup.py; tsc",
+    "heroku-postbuild": "python setup.py",
     "serve": "ts-node index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/jasmine": "^2.5.38",
     "jasmine": "^2.5.2",
     "nodemon": "^1.11.0"
   },
   "dependencies": {
     "@types/body-parser": "0.0.33",
     "@types/express": "^4.0.34",
+    "@types/jasmine": "^2.5.38",
     "@types/mongoose": "^4.6.1",
     "@types/node": "^6.0.51",
     "@types/tsmonad": "0.0.29",
