@@ -13,8 +13,8 @@ const app: express.Express = express();
 // app configuration must appear before routes are set
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-const clientDir: string = `${__dirname}/../client`;
-app.use(express.static(clientDir));
+const clientDir: string = `${__dirname}/../client/dist/`;
+app.use('/static/', express.static(path.resolve(clientDir)));
 
 // load data files into memory
 const airportCodesFile: string = `${__dirname}/data/airport-codes.dat`;
@@ -88,7 +88,7 @@ const accountBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/acc
 const verifyUserBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder(`/${utils.VERIFY_ENDPOINT}/:recordId`, user.handleVerify);
 
 const catchAllBuilder: utils.InsecureRouteBuilder = new utils.InsecureRouteBuilder('/*', (req, res) => {
-    res.sendFile(path.resolve(`${clientDir}/index.html`));
+    res.sendFile(path.resolve(`${clientDir}/../index.html`));
 });
 
 
