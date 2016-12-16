@@ -10,7 +10,6 @@ import * as emailer from './emailer';
 const log = new LoggerModule('user');
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type IUser = models.IUser;
-type ObjectIdTs = models.ObjectIdTs;
 
 export async function handleCreateUser(req: express.Request, res: express.Response): Promise<void> {
     const obj: any = req.body;
@@ -27,8 +26,8 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
                                                                        obj.password);
             newUser.caseOf({
                 right: async newUser => {
-                    const recordId: ObjectIdTs = await db.createVerificationRecord(newUser.email);
-                    const emailSendSuccess: boolean = await emailer.userVerification(newUser.firstName, newUser.email, recordId.toString());
+                    const recordUUID: string = await db.createVerificationRecord(newUser.email);
+                    const emailSendSuccess: boolean = await emailer.userVerification(newUser.firstName, newUser.email, recordUUID);
 
                     // if the email failed (e.g. hit our limit), manually verify
                     if (!emailSendSuccess) {
@@ -122,8 +121,12 @@ export async function handleGetAccount(req: express.Request, res: express.Respon
 }
 
 export async function handleVerify(req: express.Request, res: express.Response): Promise<void> {
+    if (!req.params.recordId) {
+        badRequest(res, 'no uuid specified');
+        return;
+    }
     const recordId: string = req.params.recordId;
-    const objIdTest = /^[a-f0-9]{24}$/;
+    const objIdTest = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
     if (!objIdTest.test(recordId)) {
         badRequest(res, 'bad verification id');
         return;

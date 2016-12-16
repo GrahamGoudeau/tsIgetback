@@ -60,12 +60,14 @@ export const FromAirport = mongoose.model<ITripModel>("fromAirport", tripSchema,
 export const FromCampus = mongoose.model<ITripModel>("fromCampus", tripSchema, "fromCampus");
 
 export interface IUserVerificationRecord {
-    email: string
+    email: string,
+    uuid: string
 }
 
 export interface IUserVerificationRecordModel extends IUserVerificationRecord, mongoose.Document{};
 const UserVerificationRecordSchema = new mongoose.Schema({
-    email: String
+    email: String,
+    uuid: String
 });
 
 export const UserVerificationRecord = mongoose.model<IUserVerificationRecordModel>("UserVerificationRecord", UserVerificationRecordSchema, "userVerificationRecord");
