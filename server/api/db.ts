@@ -214,8 +214,7 @@ export async function createVerificationRecord(email: string): Promise<ObjectIdT
     expirationDate.setDate(expirationDate.getDate() + 1);
 
     const record: models.IUserVerificationRecordModel = await models.UserVerificationRecord.create({
-        email: email,
-        expirationDate: expirationDate
+        email: email
     });
     return record._id;
 }
@@ -225,10 +224,11 @@ export async function getVerificationRecord(id: string): Promise<DatabaseResult<
     try {
         recordId = mongoose.Types.ObjectId(id);
     } catch (e) {
+        log.DEBUG('Got exception:', e.message);
         return Either.left(DatabaseErrorMessage.DB_ERROR);
     }
 
-    const rec: models.IUserVerificationRecordModel = await models.UserVerificationRecord.findById(recordId);
+    const rec: models.IUserVerificationRecordModel = await models.UserVerificationRecord.findOne({ _id: recordId});
     if (rec == null) {
         return Either.left(DatabaseErrorMessage.NOT_FOUND);
     }
