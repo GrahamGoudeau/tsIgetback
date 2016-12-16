@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as express from 'express';
 import * as security from './security';
 import * as tsmonad from 'tsmonad';
-import { LoggerModule } from './logger';
 
 export const DOMAIN_NAME: string = 'www.igetback.at';
 export const VERIFY_ENDPOINT: string = 'verifyEmail';

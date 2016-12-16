@@ -10,14 +10,14 @@ export class LoggerModule {
     public readonly INFO: (...msgs: any[]) => void;
     public readonly DEBUG: (...msgs: any[]) => void;
     public readonly ERROR: (...msgs: any[]) => void;
-    constructor(public readonly name: string, private readonly overrideLevel?: DebugLevel) {
-        const infoLogger = new Logger(name, overrideLevel ? overrideLevel : DebugLevel.INFO);
-        this.INFO = infoLogger.log.bind(overrideLevel ? overrideLevel : infoLogger);
+    constructor(public readonly name: string) {
+        const infoLogger = new Logger(name, DebugLevel.INFO);
+        this.INFO = infoLogger.log.bind(infoLogger);
 
-        const debugLogger = new Logger(name, overrideLevel ? overrideLevel : DebugLevel.DEBUG);
+        const debugLogger = new Logger(name, DebugLevel.DEBUG);
         this.DEBUG = debugLogger.log.bind(debugLogger);
 
-        const errorLogger = new Logger(name, overrideLevel ? overrideLevel : DebugLevel.ERROR);
+        const errorLogger = new Logger(name, DebugLevel.ERROR);
         this.ERROR = errorLogger.log.bind(errorLogger);
     }
 }
