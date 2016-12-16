@@ -6,7 +6,9 @@ import * as express from 'express';
 import * as security from './security';
 import * as mongoose from 'mongoose';
 import { Validator } from "validator.ts/Validator";
+import { LoggerModule } from './logger';
 
+const log = new LoggerModule('trips');
 const validator: Validator = new Validator();
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type ITrip = models.ITrip;
@@ -31,7 +33,7 @@ async function handleTripCreate(req: express.Request,
     try {
         tripRequest = await validator.sanitizeAndValidateAsync<models.Trip>(toValidate);
     } catch (e) {
-        console.trace('failed to validate trip:', toValidate, e);
+        log.DEBUG('failed to validate trip:', toValidate, e.message);
         throw e;
     }
 
@@ -62,7 +64,7 @@ export async function handleFromCampusCreate(req: express.Request, res: express.
     try {
         createdTrip = await handleTripCreate(req, res, authToken, db.createTripFromCampus);
     } catch (e) {
-        console.trace('exception while creating trip from campus', e);
+        log.ERROR('exception while creating trip from campus', e.message);
         badRequest(res, 'failed to create trip');
         return;
     }
@@ -70,7 +72,7 @@ export async function handleFromCampusCreate(req: express.Request, res: express.
     try {
         await db.addNewTripFromCampusToUser(createdTrip._id, authToken.email);
     } catch (e) {
-        console.trace('Problem saving to user:', e);
+        log.ERROR('Problem saving to user:', e.message);
         internalError(res, 'problem saving to user');
         return;
     }
@@ -82,7 +84,7 @@ export async function handleFromAirportCreate(req: express.Request, res: express
     try {
         createdTrip = await handleTripCreate(req, res, authToken, db.createTripFromAirport);
     } catch (e) {
-        console.trace('exception while creating trip from airport', e);
+        log.ERROR('exception while creating trip from airport', e.message);
         badRequest(res, 'failed to create trip');
         return;
     }
@@ -90,7 +92,7 @@ export async function handleFromAirportCreate(req: express.Request, res: express
     try {
         await db.addNewTripFromAirportToUser(createdTrip._id, authToken.email);
     } catch (e) {
-        console.trace('Problem saving to user:', e);
+        log.ERROR('Problem saving to user:', e.message);
         internalError(res, 'problem saving to user');
         return;
     }
@@ -120,7 +122,7 @@ export async function handleDeleteTrip(req: express.Request,
     try {
         tripId = mongoose.Types.ObjectId(req.params.tripId);
     } catch (e) {
-        console.trace('failed to convert to mongo object ID', req.params.tripId);
+        log.DEBUG('failed to convert to mongo object ID', req.params.tripId);
         badRequest(res, 'bad trip ID');
         return;
     }
@@ -140,7 +142,7 @@ export async function handleDeleteTrip(req: express.Request,
             }
         });
     } catch (e) {
-        console.trace('failed to delete trip', tripType, e);
+        log.ERROR('failed to delete trip', tripType, e.message);
         internalError(res, 'exception while deleting trip');
     }
 }
@@ -160,7 +162,7 @@ async function handleJoinTrip(req: express.Request,
     try {
         tripId = mongoose.Types.ObjectId(obj.tripId);
     } catch (e) {
-        console.trace('failed to convert to mongo object ID', obj.tripId);
+        log.DEBUG('failed to convert to mongo object ID', obj.tripId);
         badRequest(res, 'bad trip ID');
         return;
     }
@@ -177,7 +179,7 @@ async function handleJoinTrip(req: express.Request,
                         badRequest(res, 'unknown trip');
                         break;
                     default:
-                        console.trace('considered internal error:', e);
+                        log.ERROR('considered internal error:', e);
                         internalError(res);
                         break;
                 }
@@ -186,13 +188,13 @@ async function handleJoinTrip(req: express.Request,
                 if (success) {
                     successResponse(res);
                 } else {
-                    console.trace('unexpected error');
+                    log.ERROR('unexpected error');
                     utils.internalError(res);
                 }
             }
         });
     } catch (e) {
-        console.trace('exception saving user', e);
+        log.ERROR('exception saving user', e);
         utils.internalError(res);
     }
 }

@@ -7,7 +7,9 @@ import * as utils from './api/utils';
 import * as db from './api/db';
 import * as path from 'path';
 import { HttpMethod, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
+import { LoggerModule } from './api/logger';
 
+const log = new LoggerModule('index');
 const app: express.Express = express();
 
 // app configuration must appear before routes are set
@@ -21,21 +23,21 @@ const airportCodesFile: string = `${__dirname}/data/airport-codes.dat`;
 const collegesFile: string = `${__dirname}/data/colleges.dat`;
 
 const airportCodes: string[] = utils.readLines(airportCodesFile);
-console.log(`Loaded ${airportCodes.length} airorts`);
+log.INFO(`Loaded ${airportCodes.length} airorts`);
 const colleges: string[] = utils.readLines(collegesFile);
-console.log(`Loaded ${colleges.length} colleges`);
+log.INFO(`Loaded ${colleges.length} colleges`);
 
 // connect to the db
 let dbUrl: string;
-if (process.env.PRODUCTION === 'true') {
-    console.log('Using production database');
+if (utils.isProduction()) {
+    log.INFO('Using production database');
     let env = process.env;
     dbUrl = `${env.PROD_DB_PREFIX}${env.DB_USER}:${env.DB_PASS}${env.PROD_DB_SUFFIX}`;
 } else {
-    console.log('Using dev database');
+    log.INFO('Using dev database');
     dbUrl = 'mongodb://localhost:27017/igetback-db';
 }
-console.log(`Connecting to ${dbUrl}`);
+log.DEBUG(`Connecting to ${dbUrl}`);
 mongoose.connect(dbUrl);
 
 // set up routes
@@ -135,4 +137,4 @@ routeManager.addInsecureRoutes(insecureRoutes);
 // run
 const port = process.env.PORT || 5000;
 app.listen(port);
-console.log(`Listening on port ${port}`);
+log.INFO(`Listening on port ${port}`);

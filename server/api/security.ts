@@ -3,7 +3,9 @@ import * as tsmonad from 'tsmonad';
 import * as db from './db';
 import * as models from './models';
 import * as utils from './utils';
+import { LoggerModule } from './logger';
 
+const log = new LoggerModule('security');
 const Maybe = tsmonad.Maybe;
 type Maybe<T> = tsmonad.Maybe<T>;
 type ObjectIdTs = models.ObjectIdTs;
@@ -14,6 +16,9 @@ const encoding: crypto.Utf8AsciiBinaryEncoding = 'utf8';
 const formatBinary: crypto.HexBase64BinaryEncoding = 'hex';
 const formatLatin: crypto.HexBase64Latin1Encoding = 'hex';
 const password = process.env.CRYPT_PASS;
+if (!password) {
+    log.ERROR('CRYPTO PASSWORD NOT SET - EXCEPTIONS WILL BE RAISED');
+}
 
 export function encrypt(text: string): string {
     try {
@@ -22,8 +27,8 @@ export function encrypt(text: string): string {
 
         return encrypted + cipher.final(formatBinary);
     } catch (e) {
-        console.trace('crypto error in encrypt', e);
-        return '';
+        log.ERROR('crypto error in encrypt', e.message);
+        throw e;
     }
 }
 
@@ -34,8 +39,8 @@ export function decrypt(encrypted: string): string {
 
         return dec + decipher.final(encoding);
     } catch (e) {
-        console.trace('crypto error in decrypt', e);
-        return '';
+        log.ERROR('crypto error in decrypt', e.message);
+        throw e;
     }
 }
 
@@ -45,9 +50,9 @@ export function hashPassword(salt: string, password: string): string {
         hashMethod.update(password);
         return hashMethod.digest(formatLatin);
     } catch (e) {
-        console.trace('could not hash password', password, 'with salt', salt, 'e:', e);
+        log.ERROR('could not hash password', password, 'with salt', salt, 'internal message:', e.message);
         // TODO: probably a bad idea?
-        return null;
+        throw e;
     }
 }
 
@@ -92,8 +97,8 @@ export function parseCookie(cookie: string): Maybe<AuthToken> {
 
         return Maybe.just(result);
     } catch (e) {
-        console.trace('JSON exception parsing cookie:', e);
-        console.trace('JSON:', decrypt(token));
+        log.ERROR('JSON exception parsing cookie:', e.message);
+        log.ERROR('JSON:', decrypt(token));
     }
 
     return fail;
@@ -127,11 +132,11 @@ export async function sendVerificationEmail(email: string): Promise<boolean> {
     if (process.env.PRODUCTION === 'true') {
         // send the email to the user
         const verifyLink = `${utils.DOMAIN_NAME}/${utils.VERIFY_ENDPOINT}/${recordId}`;
-        console.log('Sending link:', verifyLink);
+        log.INFO('Sending link:', verifyLink);
     }
 
     if (!sendSuccess) {
-        console.log('Failed to send verification email to user', email);
+        log.INFO('Failed to send verification email to user', email);
         await db.verifyUser({email: email});
         return false;
     }
