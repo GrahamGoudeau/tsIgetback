@@ -2,6 +2,9 @@ import * as models from './models';
 import * as tsmonad from 'tsmonad';
 import * as security from './security';
 import * as mongoose from 'mongoose';
+import { LoggerModule } from './logger';
+
+const log = new LoggerModule('db');
 
 type IUser = models.IUser;
 type ObjectIdTs = models.ObjectIdTs;
@@ -129,7 +132,7 @@ async function createTrip(query: CreateTripQuery, model: mongoose.Model<models.I
         const t = await newTrip.save();
         return Either.right(t);
     } catch (e) {
-        console.trace('exception creating trip:', e);
+        log.ERROR('exception creating trip', e.name, e.message);
         throw e;
     }
 }
@@ -201,7 +204,7 @@ export async function addUserToTrip(tripId: ObjectIdTs, emailToAdd: string, trip
         await model.findOneAndUpdate(searchObj, updateObj, { new: true });
         return Either.right(true);
     } catch (e) {
-        console.trace('exception saving user to trip:', e);
+        log.ERROR('exception saving user to trip:', e.message);
         return Either.left(DatabaseErrorMessage.DB_ERROR);
     }
 }

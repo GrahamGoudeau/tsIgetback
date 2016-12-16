@@ -4,7 +4,9 @@ import { badRequest, jsonResponse, internalError } from './utils';
 import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
+import { LoggerModule } from './logger';
 
+const log = new LoggerModule('user');
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type IUser = models.IUser;
 
@@ -41,7 +43,7 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
             });
         } catch (e) {
             const msg = 'exception while creating user';
-            console.trace(msg, e);
+            log.ERROR(msg, e.message);
             internalError(res, msg);
             return;
         }
@@ -95,7 +97,7 @@ export async function handleLogin(req: express.Request, res: express.Response): 
             });
         } catch (e) {
             const msg = 'exception while logging in';
-            console.trace(msg, e);
+            log.ERROR(msg, e.message);
             internalError(res, msg);
         }
     } else {

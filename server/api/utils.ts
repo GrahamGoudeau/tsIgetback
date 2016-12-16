@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as express from 'express';
 import * as security from './security';
 import * as tsmonad from 'tsmonad';
+import { LoggerModule } from './logger';
 
 export const DOMAIN_NAME: string = 'www.igetback.at';
 export const VERIFY_ENDPOINT: string = 'verifyEmail';
@@ -47,11 +48,9 @@ export class RouteManager {
                 return this.app.delete.bind(this.app);
             }
             default: {
-                console.trace('Misconfigured route');
-                break;
+                throw new Error('misconfigured route');
             }
         }
-        return null;
     }
 
     public addInsecureRoute(route: InsecureRoute): void {
@@ -148,6 +147,9 @@ export class SecureRoute extends Route {
     }
 }
 
+export function isProduction(): boolean {
+    return process.env.PRODUCTION === 'true';
+}
 
 export interface IGetBackResponse {
     error?: {
