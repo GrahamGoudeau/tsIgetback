@@ -40,6 +40,18 @@ describe('A user', () => {
         done();
     });
 
+    it('should not care about case in email address', async (done) => {
+        const password: string = test_utils.makeString(20);
+        const newUser: models.IUser = await test_utils.createUser(password);
+        try {
+            const authToken: AuthToken = await test_utils.login(newUser.email.toUpperCase(), password);
+            expect(authToken).not.toBeUndefined();
+        } catch (e) {
+            fail();
+        }
+        done();
+    });
+
     it('can be created', async (done) => {
         const newUserResponse: IGetBackResponse = await WebRequest.json<IGetBackResponse>(
             test_utils.makeEndpoint('user/create'),
