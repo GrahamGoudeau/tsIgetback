@@ -3,6 +3,7 @@ import * as tsmonad from 'tsmonad';
 import * as security from './security';
 import * as mongoose from 'mongoose';
 import { LoggerModule } from './logger';
+import * as uuid from 'uuid';
 
 const log = new LoggerModule('db');
 
@@ -209,26 +210,19 @@ export async function addUserToTrip(tripId: ObjectIdTs, emailToAdd: string, trip
     }
 }
 
-export async function createVerificationRecord(email: string): Promise<ObjectIdTs> {
+export async function createVerificationRecord(email: string): Promise<string> {
     const expirationDate: Date = new Date();
     expirationDate.setDate(expirationDate.getDate() + 1);
 
     const record: models.IUserVerificationRecordModel = await models.UserVerificationRecord.create({
         email: email,
-        expirationDate: expirationDate
+        uuid: uuid.v4()
     });
-    return record._id;
+    return record.uuid;
 }
 
 export async function getVerificationRecord(id: string): Promise<DatabaseResult<models.IUserVerificationRecord>> {
-    let recordId: ObjectIdTs;
-    try {
-        recordId = mongoose.Types.ObjectId(id);
-    } catch (e) {
-        return Either.left(DatabaseErrorMessage.DB_ERROR);
-    }
-
-    const rec: models.IUserVerificationRecordModel = await models.UserVerificationRecord.findById(recordId);
+    const rec: models.IUserVerificationRecordModel = await models.UserVerificationRecord.findOne({ uuid: id });
     if (rec == null) {
         return Either.left(DatabaseErrorMessage.NOT_FOUND);
     }

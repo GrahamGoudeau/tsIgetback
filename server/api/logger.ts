@@ -46,8 +46,6 @@ class Logger {
             return;
         }
 
-        const m = this.level === DebugLevel.ERROR ? console.trace : console.log;
-
         const strings = msgs.map(x => {
             if (typeof x === 'object') {
                 return JSON.stringify(x);
@@ -55,8 +53,12 @@ class Logger {
                 return x.toString();
             };
         });
-        const message = `[${this.name}] : ${levelToString(this.level)} -- ${strings.join(' ')}`;
-        m(message);
+
+        const message = `[${levelToString(this.level)} ${this.name}] -- ${strings.join(' ')}`;
+        console.log(message);
+        if (this.level === DebugLevel.ERROR) {
+            console.trace();
+        }
     }
 }
 

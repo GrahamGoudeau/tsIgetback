@@ -5,6 +5,7 @@ import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
 import { LoggerModule } from './logger';
+import * as emailer from './emailer';
 
 const log = new LoggerModule('user');
 type DatabaseResult<T> = db.DatabaseResult<T>;
@@ -25,7 +26,13 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
                                                                        obj.password);
             newUser.caseOf({
                 right: async newUser => {
-                    const emailSendSuccess = await security.sendVerificationEmail(newUser.email);
+                    const recordUUID: string = await db.createVerificationRecord(newUser.email);
+                    const emailSendSuccess: boolean = await emailer.userVerification(newUser.firstName, newUser.email, recordUUID);
+
+                    // if the email failed (e.g. hit our limit), manually verify
+                    if (!emailSendSuccess) {
+                        await db.verifyUser({email: newUser.email});
+                    }
                     jsonResponse(res, {
                         newUser: newUser,
                         emailSendSuccess: emailSendSuccess
@@ -114,9 +121,22 @@ export async function handleGetAccount(req: express.Request, res: express.Respon
 }
 
 export async function handleVerify(req: express.Request, res: express.Response): Promise<void> {
-    const recResult: db.DatabaseResult<models.IUserVerificationRecord> = await db.getVerificationRecord(req.params.tripId);
+    if (!req.params.recordId) {
+        badRequest(res, 'no uuid specified');
+        return;
+    }
+    const recordId: string = req.params.recordId;
+    const objIdTest = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+    if (!objIdTest.test(recordId)) {
+        badRequest(res, 'bad verification id');
+        return;
+    }
+
+    const recResult: db.DatabaseResult<models.IUserVerificationRecord> = await db.getVerificationRecord(recordId);
     await recResult.caseOf({
-        left: async e => badRequest(res, 'bad verification id'),
+        left: async e => {
+            badRequest(res, 'bad verification id');
+        },
         right: async rec => {
             await db.verifyUser({email: rec.email})
             res.redirect('/login');

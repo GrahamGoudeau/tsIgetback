@@ -1,14 +1,11 @@
 import * as crypto from 'crypto';
 import * as tsmonad from 'tsmonad';
 import * as db from './db';
-import * as models from './models';
-import * as utils from './utils';
 import { LoggerModule } from './logger';
 
 const log = new LoggerModule('security');
 const Maybe = tsmonad.Maybe;
 type Maybe<T> = tsmonad.Maybe<T>;
-type ObjectIdTs = models.ObjectIdTs;
 
 const algorithm = 'aes-256-ctr';
 const hash = 'sha512';
@@ -123,23 +120,3 @@ export async function validateAuthToken(token: AuthToken): Promise<boolean> {
     return expiresAt > currentTime && userExists;
 }
 
-/**
- * @returns true if an email was sent, false if the user had to be manually verified (no email)
- */
-export async function sendVerificationEmail(email: string): Promise<boolean> {
-    const recordId: ObjectIdTs = await db.createVerificationRecord(email);
-    const sendSuccess = false;
-    if (process.env.PRODUCTION === 'true') {
-        // send the email to the user
-        const verifyLink = `${utils.DOMAIN_NAME}/${utils.VERIFY_ENDPOINT}/${recordId}`;
-        log.INFO('Sending link:', verifyLink);
-    }
-
-    if (!sendSuccess) {
-        log.INFO('Failed to send verification email to user', email);
-        await db.verifyUser({email: email});
-        return false;
-    }
-
-    return true;
-}

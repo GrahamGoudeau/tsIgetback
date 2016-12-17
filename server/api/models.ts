@@ -61,13 +61,13 @@ export const FromCampus = mongoose.model<ITripModel>("fromCampus", tripSchema, "
 
 export interface IUserVerificationRecord {
     email: string,
-    expirationDate: Date
+    uuid: string
 }
 
 export interface IUserVerificationRecordModel extends IUserVerificationRecord, mongoose.Document{};
 const UserVerificationRecordSchema = new mongoose.Schema({
     email: String,
-    expirationDate: Date
+    uuid: String
 });
 
 export const UserVerificationRecord = mongoose.model<IUserVerificationRecordModel>("UserVerificationRecord", UserVerificationRecordSchema, "userVerificationRecord");
