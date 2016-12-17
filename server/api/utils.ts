@@ -13,6 +13,11 @@ export type SecureContinuation = (req: express.Request,
                                   res: express.Response,
                                   authToken: security.AuthToken) => void;
 
+export function o<A, B, C>(f: (y: B) => C,
+                           g: (x: A) => B): (z: A) => C {
+    return x => f(g(x));
+}
+
 export enum HttpMethod {
     GET,
     POST,

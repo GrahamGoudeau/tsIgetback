@@ -1,4 +1,4 @@
-import { isProduction, DOMAIN_NAME, VERIFY_ENDPOINT } from './utils';
+import { o, isProduction, DOMAIN_NAME, VERIFY_ENDPOINT } from './utils';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
 import * as nodemailer from 'nodemailer';
@@ -10,9 +10,8 @@ const doSend: boolean = process.env.MAIL_DEBUG === "true" || isProduction();
 const fromAddress: string = process.env.MAIL_ADDR;
 const transporter: nodemailer.Transporter = nodemailer.createTransport(`smtps://${process.env.MAIL_USER}%40gmail.com:${process.env.MAIL_PASS}@smtp.gmail.com`);
 
-function compileFromTemplateSource(fileName: string): HandlebarsTemplateDelegate {
-    return handlebars.compile(fs.readFileSync(`${templateDir}/${fileName}`, 'utf8'));
-}
+const compileFromTemplateSource: (fileName: string) => HandlebarsTemplateDelegate
+        = o(handlebars.compile, x => fs.readFileSync(`${templateDir}/${x}`, 'utf8'));
 
 const templates = {
     'userVerification': compileFromTemplateSource('userVerification.html')
