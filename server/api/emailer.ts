@@ -1,14 +1,21 @@
-import { o, isProduction, DOMAIN_NAME, VERIFY_ENDPOINT } from './utils';
+import { o } from './utils';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
 import * as nodemailer from 'nodemailer';
 import { LoggerModule } from './logger';
+import { IGetBackConfig } from '../config';
 
 const log: LoggerModule = new LoggerModule('emailer');
 const templateDir: string = `${__dirname}/../data/templates/`;
-const doSend: boolean = process.env.MAIL_DEBUG === "true" || isProduction();
-const fromAddress: string = process.env.MAIL_ADDR;
-const transporter: nodemailer.Transporter = nodemailer.createTransport(`smtps://${process.env.MAIL_USER}%40gmail.com:${process.env.MAIL_PASS}@smtp.gmail.com`);
+const config = IGetBackConfig.getInstance();
+const domainName = config.getStringConfig('DOMAIN_NAME');
+const verifyEndpoint = config.getStringConfig('VERIFY_ENDPOINT');
+
+const doSend: boolean = config.getBooleanConfigDefault('MAIL_DEBUG', false) || config.getBooleanConfigDefault('PRODUCTION', false);
+const fromAddress: string = config.getStringConfigDefault('MAIL_ADDR', '');
+const mailUser: string = config.getStringConfigDefault('MAIL_USER', '');
+const mailPass: string = config.getStringConfigDefault('MAIL_PASS', '');
+const transporter: nodemailer.Transporter = nodemailer.createTransport(`smtps://${mailUser}%40gmail.com:${mailPass}@smtp.gmail.com`);
 
 const compileFromTemplateSource: (fileName: string) => HandlebarsTemplateDelegate
         = o(handlebars.compile, x => fs.readFileSync(`${templateDir}/${x}`, 'utf8'));
@@ -29,7 +36,7 @@ export function userVerification(firstName: string, email: string, recordId: str
         subject: 'Verify Your IGetBack Account',
         html: templates.userVerification({
             firstName: firstName,
-            verifyLink: `${DOMAIN_NAME}/${VERIFY_ENDPOINT}/${recordId}`
+            verifyLink: `${domainName}/${verifyEndpoint}/${recordId}`
         })
     };
     return new Promise((resolve, reject) => {

@@ -1,4 +1,4 @@
-import { isProduction } from './utils';
+import { IGetBackConfig } from '../config';
 
 enum DebugLevel {
     INFO,
@@ -36,9 +36,11 @@ function levelToString(level: DebugLevel) {
 }
 
 class Logger {
-    private isProduction: boolean;
+    private isProduction: boolean = process.env.PRODUCTION === 'true';
+    private productionOverride: boolean = process.env.LOG_DEBUG === 'true';
     constructor(private name: string, private level: DebugLevel) {
-        this.isProduction = isProduction();
+        // TODO: figure out a way around this dependency cycle that ISNT hacky and awful
+        //this.isProduction = this.config.getBooleanConfigDefault('PRODUCTION', false);
     }
 
     public log(...msgs: any[]): void {

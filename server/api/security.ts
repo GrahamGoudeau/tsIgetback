@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import * as tsmonad from 'tsmonad';
 import * as db from './db';
 import { LoggerModule } from './logger';
+import { IGetBackConfig } from '../config';
 
 const log = new LoggerModule('security');
 const Maybe = tsmonad.Maybe;
@@ -12,10 +13,8 @@ const hash = 'sha512';
 const encoding: crypto.Utf8AsciiBinaryEncoding = 'utf8';
 const formatBinary: crypto.HexBase64BinaryEncoding = 'hex';
 const formatLatin: crypto.HexBase64Latin1Encoding = 'hex';
-const password = process.env.CRYPT_PASS;
-if (!password) {
-    log.ERROR('CRYPTO PASSWORD NOT SET - EXCEPTIONS WILL BE RAISED');
-}
+const config = IGetBackConfig.getInstance();
+const password = config.getStringConfig('CRYPT_PASS');
 
 export function encrypt(text: string): string {
     try {
