@@ -8,9 +8,13 @@ import * as db from './api/db';
 import * as path from 'path';
 import { HttpMethod, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
 import { LoggerModule } from './api/logger';
+import { IGetBackConfig } from './config';
 
 const log = new LoggerModule('index');
 const app: express.Express = express();
+const config = IGetBackConfig.getInstance();
+const verifyEndpoint = config.getStringConfig('VERIFY_ENDPOINT');
+const isProduction = config.getBooleanConfigDefault('PRODUCTION', false);
 
 // app configuration must appear before routes are set
 app.use(bodyParser.urlencoded({extended: true}));
@@ -29,10 +33,13 @@ log.INFO(`Loaded ${colleges.length} colleges`);
 
 // connect to the db
 let dbUrl: string;
-if (utils.isProduction()) {
+if (isProduction) {
     log.INFO('Using production database');
-    let env = process.env;
-    dbUrl = `${env.PROD_DB_PREFIX}${env.DB_USER}:${env.DB_PASS}${env.PROD_DB_SUFFIX}`;
+    const prefix: string = config.getStringConfig('PROD_DB_PREFIX');
+    const user: string = config.getStringConfig('DB_USER');
+    const pass: string = config.getStringConfig('DB_PASS');
+    const suffix: string = config.getStringConfig('PROD_DB_SUFFIX');
+    dbUrl = `${prefix}${user}:${pass}${suffix}`;
 } else {
     log.INFO('Using dev database');
     dbUrl = 'mongodb://localhost:27017/igetback-db';
@@ -87,7 +94,7 @@ const fromAirportDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api
 const accountBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/account', user.handleGetAccount)
     .setIsAjax(true);
 
-const verifyUserBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder(`/${utils.VERIFY_ENDPOINT}/:recordId`, user.handleVerify);
+const verifyUserBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder(`/${verifyEndpoint}/:recordId`, user.handleVerify);
 
 const catchAllBuilder: utils.InsecureRouteBuilder = new utils.InsecureRouteBuilder('/*', (req, res) => {
     res.sendFile(path.resolve(`${clientDir}/../index.html`));
@@ -135,6 +142,6 @@ routeManager.addInsecureRoutes(insecureRoutes);
 
 
 // run
-const port = process.env.PORT || 5000;
+const port = config.getNumberConfig('PORT');
 app.listen(port);
 log.INFO(`Listening on port ${port}`);

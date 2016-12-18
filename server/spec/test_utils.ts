@@ -2,8 +2,10 @@ import * as WebRequest from 'web-request';
 import * as models from '../api/models';
 import { AuthToken } from '../api/security';
 import { IGetBackResponse } from '../api/utils';
+import { IGetBackConfig } from '../config';
 
-const portNumber = process.env.PORT || 5000;
+const config: IGetBackConfig = IGetBackConfig.getInstance();
+const portNumber = config.getNumberConfig('PORT');
 const rootUrl = `http://localhost:${portNumber}`;
 
 export function makeEndpoint(endpoint: string): string {

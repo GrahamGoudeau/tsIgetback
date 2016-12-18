@@ -3,9 +3,6 @@ import * as express from 'express';
 import * as security from './security';
 import * as tsmonad from 'tsmonad';
 
-export const DOMAIN_NAME: string = 'www.igetback.at';
-export const VERIFY_ENDPOINT: string = 'verifyEmail';
-
 export type InsecureContinuation = (req: express.Request,
                                     res: express.Response) => void;
 
@@ -149,10 +146,6 @@ export class SecureRoute extends Route {
         super(builder.route, builder.httpMethod, builder.isAjax);
         this.cont = builder.cont;
     }
-}
-
-export function isProduction(): boolean {
-    return process.env.PRODUCTION === 'true';
 }
 
 export interface IGetBackResponse {
