@@ -1,6 +1,6 @@
 import * as db from './db';
 import * as utils from './utils';
-import { badRequest, jsonResponse, internalError } from './utils';
+import { badRequest, jsonResponse, internalError, successResponse } from './utils';
 import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
@@ -142,4 +142,25 @@ export async function handleVerify(req: express.Request, res: express.Response):
             res.redirect('/login');
         }
     });
+}
+
+export async function handleSubscribe(req: express.Request,
+                                      res: express.Response,
+                                      authToken: security.AuthToken,
+                                      tripType: db.AddToCampusOrAirport
+                                     ): Promise<void> {
+    if (!req.body || !req.body.tripDate ||
+            !req.body.airport || !req.body.college) {
+        badRequest(res, 'missing fields');
+        return;
+    }
+    const tripDateStr = req.body.tripDate;
+    if (!utils.dateRegex.test(tripDateStr)) {
+        badRequest(res, 'date must be in mm/dd/yyyy format');
+        return;
+    }
+    const tripDate = new Date(tripDateStr);
+
+    await db.subscribeUser(authToken.email, tripDate, req.body.airport, req.body.college, tripType);
+    successResponse(res);
 }
