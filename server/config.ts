@@ -3,7 +3,6 @@ import { LoggerModule } from './api/logger';
 const log = new LoggerModule('config');
 export class IGetBackConfig {
     private static INSTANCE: IGetBackConfig = null;
-    private log = null;
     public static getInstance() {
         if (IGetBackConfig.INSTANCE == null) {
             IGetBackConfig.INSTANCE = new IGetBackConfig(process.env);
@@ -80,8 +79,8 @@ export class IGetBackConfig {
         } else if (returnType === 'string') {
             return value;
         } else if (returnType === 'number') {
-            const result: number = parseInt(value);
-            if (isNaN(result)) {
+            const result: number = Number(value);
+            if (value === '' || isNaN(result)) {
                 throw new Error(`Config key ${key} set to '${value}' which is not of type integer`);
             }
             return result;
