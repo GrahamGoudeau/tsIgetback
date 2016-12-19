@@ -8,8 +8,8 @@
     "dev": "env $(cat .env) nodemon -e js --exec 'ts-node' index.ts",
     "build": "tsc",
     "watch": "tsc -w",
-    "heroku-postbuild": "python setup.py",
-    "serve": "ts-node index.ts"
+    "serve": "ts-node index.ts",
+    "postinstall": "python setup.py"
   },
   "keywords": [],
   "author": "",
