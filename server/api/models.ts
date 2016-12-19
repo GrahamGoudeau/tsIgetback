@@ -59,6 +59,24 @@ const tripSchema = new mongoose.Schema({
 export const FromAirport = mongoose.model<ITripModel>("fromAirport", tripSchema, "fromAirport");
 export const FromCampus = mongoose.model<ITripModel>("fromCampus", tripSchema, "fromCampus");
 
+export interface ISubscription {
+    email: string;
+    airport: string;
+    college: string;
+    tripDate: Date;
+}
+
+export interface ISubscriptionModel extends ISubscription, mongoose.Document{};
+const subscriptionSchema = new mongoose.Schema({
+    email: String,
+    airport: String,
+    college: String,
+    tripDate: Date
+});
+
+export const FromAirportSubscription = mongoose.model<ISubscriptionModel>("fromAirportSubscription", subscriptionSchema, "fromAirportSubscription");
+export const FromCampusSubscription = mongoose.model<ISubscriptionModel>("fromCampusSubscription", subscriptionSchema, "fromCampusSubscription");
+
 export interface IUserVerificationRecord {
     email: string,
     uuid: string
