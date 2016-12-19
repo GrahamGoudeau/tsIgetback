@@ -15,7 +15,7 @@
 1. In order to run the backend server, you need:
   * At least the three following:
     * `mongo` running on port 27017 (should be the default)- run `mongod`, and keep that terminal tab open in the background or in another window (`mongod` needs to be running for the server to connect to it)
-    * a `.env` file defining your environment constants.  A minimum `.env` file can be created by defining the only required constant (in development) in the following way: run `echo 'CRYPT_PASS=PWD' > .env`, where you replace `PWD` with a password of your choosing.  This defines the key used to encrypt users' passwords, and can be any value.
+    * a `.env` file defining your environment constants.  This includes things like the key used to encrypt passwords, port number, and other global config values.  A minimum `.env` file can be created by simply renaming the `.dev.env` file in `server/` to `.env`.  The `.dev.env` file contains the bare minimum amount of config settings needed to run the server, and contains some dummy values (like "halligan4lyfe" as the password) that you may change if you want, but you don't *need* to change anything.  Logging statements will appear when you start the server informing you which config values have not been defined; mostly, you can ignore these if no error is raised.
     * the development server running with `npm run dev` in the `server` directory (will watch for changes to files and reload when a change occurs)
   * And if you are developing, you may like to do:
     * For the backend (`server` directory): `tsc -w` (assuming the compiler is globally installed, or do `npm run watch` if it is not) to have the compiler watch for changes to `*.ts` files.
