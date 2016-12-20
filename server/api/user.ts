@@ -150,7 +150,8 @@ export async function handleSubscribe(req: express.Request,
                                       tripType: db.AddToCampusOrAirport
                                      ): Promise<void> {
     if (!req.body || !req.body.tripDate ||
-            !req.body.airport || !req.body.college) {
+            !req.body.airport || !req.body.college ||
+            !req.body.tripHour || !req.body.tripQuarterHour) {
         badRequest(res, 'missing fields');
         return;
     }
@@ -161,6 +162,14 @@ export async function handleSubscribe(req: express.Request,
     }
     const tripDate = new Date(tripDateStr);
 
-    await db.subscribeUser(authToken.email, tripDate, req.body.airport, req.body.college, tripType);
+    const subscription: models.ISubscription = {
+        email: authToken.email,
+        tripDate: tripDate,
+        airport: req.body.airport,
+        college: req.body.college,
+        tripHour: req.body.tripHour,
+        tripQuarterHour: req.body.tripQuarterHour
+    };
+    await db.subscribeUser(subscription, tripType);
     successResponse(res);
 }

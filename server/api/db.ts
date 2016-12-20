@@ -259,18 +259,12 @@ export async function deleteTrip(tripId: ObjectIdTs, ownerEmail: string, tripTyp
     return Either.right(result != null);
 }
 
-export async function subscribeUser(email: string, tripDate: Date, airport: string, college: string, tripType: AddToCampusOrAirport): Promise<void> {
+export async function subscribeUser(newSubscription: models.ISubscription, tripType: AddToCampusOrAirport): Promise<void> {
     let model: mongoose.Model<models.ISubscriptionModel>;
     if (tripType === AddToCampusOrAirport.FROM_CAMPUS) {
         model = models.FromCampusSubscription;
     } else {
         model = models.FromAirportSubscription;
     }
-    const newSubscription: models.ISubscription = {
-        email: email,
-        tripDate: tripDate,
-        airport: airport,
-        college: college
-    };
     await model.create(newSubscription);
 }
