@@ -1,3 +1,6 @@
+import { getEmailerInstance, IEmailer } from './emailer';
+import { o } from './utils';
+
 enum DebugLevel {
     INFO,
     DEBUG,
@@ -35,6 +38,14 @@ function levelToString(level: DebugLevel) {
 
 class Logger {
     private isProduction: boolean = process.env.PRODUCTION === 'true';
+    private stringify: (x: any[]) => string = o(x => x.join(' '), (y: any[]) => y.map(msg => {
+        if (typeof msg === 'object') {
+            return JSON.stringify(msg);
+        } else {
+            return msg.toString();
+        };
+    }));
+
     constructor(private name: string, private level: DebugLevel) {
         // TODO: figure out a way around this dependency cycle that ISNT hacky and awful
         //this.isProduction = this.config.getBooleanConfigDefault('PRODUCTION', false);
@@ -45,17 +56,11 @@ class Logger {
             return;
         }
 
-        const strings = msgs.map(x => {
-            if (typeof x === 'object') {
-                return JSON.stringify(x);
-            } else {
-                return x.toString();
-            };
-        });
-
-        const message = `[${levelToString(this.level)} ${this.name}] -- ${strings.join(' ')}`;
+        const message = `[${levelToString(this.level)} ${this.name}] -- ${this.stringify(msgs)}`;
         console.log(message);
-        if (this.level === DebugLevel.ERROR) {
+        if (this.level === DebugLevel.ERROR && this.isProduction) {
+            const emailer: IEmailer = getEmailerInstance();
+            emailer.errorAlert(message);
             console.trace();
         }
     }

@@ -5,9 +5,10 @@ import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
 import { LoggerModule } from './logger';
-import * as emailer from './emailer';
+import { getEmailerInstance, IEmailer } from './emailer';
 
 const log = new LoggerModule('user');
+const emailer: IEmailer = getEmailerInstance();
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type IUser = models.IUser;
 
