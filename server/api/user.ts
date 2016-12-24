@@ -169,7 +169,8 @@ export async function handleSubscribe(req: express.Request,
         airport: req.body.airport,
         college: req.body.college,
         tripHour: req.body.tripHour,
-        tripQuarterHour: req.body.tripQuarterHour
+        tripQuarterHour: req.body.tripQuarterHour,
+        dateCreated: new Date()
     };
     await db.subscribeUser(subscription, tripType);
     successResponse(res);

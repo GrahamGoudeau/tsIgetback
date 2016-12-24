@@ -66,6 +66,7 @@ export interface ISubscription {
     tripDate: Date;
     tripHour: number;
     tripQuarterHour: number;
+    dateCreated: Date;
 }
 
 export interface ISubscriptionModel extends ISubscription, mongoose.Document{};
@@ -75,7 +76,8 @@ const subscriptionSchema = new mongoose.Schema({
     college: String,
     tripDate: Date,
     tripHour: Number,
-    tripQuarterHour: Number
+    tripQuarterHour: Number,
+    dateCreated: Date
 });
 
 export const FromAirportSubscription = mongoose.model<ISubscriptionModel>("fromAirportSubscription", subscriptionSchema, "fromAirportSubscription");
