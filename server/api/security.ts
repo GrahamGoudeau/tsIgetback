@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import * as tsmonad from 'tsmonad';
-import * as db from './db';
+import { AuthToken } from './requestUtils';
 import { LoggerModule } from './logger';
 import { IGetBackConfig } from '../config';
 
@@ -50,11 +50,6 @@ export function hashPassword(salt: string, password: string): string {
         // TODO: probably a bad idea?
         throw e;
     }
-}
-
-export interface AuthToken {
-    email: string,
-    authorizedAt: Date
 }
 
 export function buildAuthToken(email: string): string {
@@ -115,7 +110,6 @@ export async function validateAuthToken(token: AuthToken): Promise<boolean> {
     const currentTime = new Date();
     const oneHour = 3600000;
     const expiresAt = new Date(token.authorizedAt.getTime() + oneHour);
-    const userExists: boolean = await db.doesUserExist({email: token.email});
-    return expiresAt > currentTime && userExists;
+    return expiresAt > currentTime;
 }
 

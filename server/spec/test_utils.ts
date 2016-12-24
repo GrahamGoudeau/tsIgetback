@@ -1,8 +1,8 @@
 import * as WebRequest from 'web-request';
 import * as models from '../api/models';
-import { AuthToken } from '../api/security';
-import { IGetBackResponse } from '../api/utils';
 import { IGetBackConfig } from '../config';
+import { AuthToken, IGetBackResponse } from '../api/requestUtils';
+
 
 const config: IGetBackConfig = IGetBackConfig.getInstance();
 const portNumber = config.getNumberConfig('PORT');
