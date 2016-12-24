@@ -1,6 +1,5 @@
 import { LoggerModule } from './api/logger';
 
-const log = new LoggerModule('config');
 export class IGetBackConfig {
     private static INSTANCE: IGetBackConfig = null;
     public static getInstance() {
@@ -26,22 +25,23 @@ export class IGetBackConfig {
             'PROD_DB_PREFIX',
             'PROD_DB_SUFFIX',
             'CRYPT_PASS',
-            'MAIL_ADDR',
-            'MAIL_USER',
-            'MAIL_PASS',
             'DOMAIN_NAME',
             'VERIFY_ENDPOINT',
+            'MAIL_ADDR',
+            'LOG_ADDR',
+            'SPARKPOST_API_KEY',
         ],
         numberFields: [
             'PORT'
         ]
     };
     private typeMapping = {};
+    private readonly log = new LoggerModule('config');
 
     private constructor(private readonly env) {
         const checkKey = (k, type) => {
             if (env[k] == null) {
-                log.INFO(`Config key ${k} of type '${type}' not set`);
+                this.log.INFO(`Config key ${k} of type '${type}' not set`);
             }
         };
         this.registeredFields.booleanFields.forEach(k => {
@@ -93,6 +93,7 @@ export class IGetBackConfig {
 
     public getBooleanConfigDefault(key: string, other: boolean): boolean {
         if (!this.isConfigSet(key)) {
+            this.log.INFO(`Request for config key ${key} defaulting to ${other}`);
             return other;
         }
         return this.getBooleanConfig(key);
@@ -104,6 +105,7 @@ export class IGetBackConfig {
 
     public getStringConfigDefault(key: string, other: string): string {
         if (!this.isConfigSet(key)) {
+            this.log.INFO(`Request for config key ${key} defaulting to ${other}`);
             return other;
         }
         return this.getStringConfig(key);

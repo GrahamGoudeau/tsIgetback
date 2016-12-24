@@ -15,6 +15,8 @@ export function o<A, B, C>(f: (y: B) => C,
     return x => f(g(x));
 }
 
+export const dateRegex: RegExp = /^[0-9]{1, 2}\/[0-9]{1,2}\/[0-9]{1, 4}$/;
+
 export enum HttpMethod {
     GET,
     POST,

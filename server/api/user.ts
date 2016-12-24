@@ -1,13 +1,14 @@
 import * as db from './db';
 import * as utils from './utils';
-import { badRequest, jsonResponse, internalError } from './utils';
+import { badRequest, jsonResponse, internalError, successResponse } from './utils';
 import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
 import { LoggerModule } from './logger';
-import * as emailer from './emailer';
+import { getEmailerInstance, IEmailer } from './emailer';
 
 const log = new LoggerModule('user');
+const emailer: IEmailer = getEmailerInstance();
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type IUser = models.IUser;
 
@@ -142,4 +143,35 @@ export async function handleVerify(req: express.Request, res: express.Response):
             res.redirect('/login');
         }
     });
+}
+
+export async function handleSubscribe(req: express.Request,
+                                      res: express.Response,
+                                      authToken: security.AuthToken,
+                                      tripType: db.AddToCampusOrAirport
+                                     ): Promise<void> {
+    if (!req.body || !req.body.tripDate ||
+            !req.body.airport || !req.body.college ||
+            !req.body.tripHour || !req.body.tripQuarterHour) {
+        badRequest(res, 'missing fields');
+        return;
+    }
+    const tripDateStr = req.body.tripDate;
+    if (!utils.dateRegex.test(tripDateStr)) {
+        badRequest(res, 'date must be in mm/dd/yyyy format');
+        return;
+    }
+    const tripDate = new Date(tripDateStr);
+
+    const subscription: models.ISubscription = {
+        email: authToken.email,
+        tripDate: tripDate,
+        airport: req.body.airport,
+        college: req.body.college,
+        tripHour: req.body.tripHour,
+        tripQuarterHour: req.body.tripQuarterHour,
+        dateCreated: new Date()
+    };
+    await db.subscribeUser(subscription, tripType);
+    successResponse(res);
 }
