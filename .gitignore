@@ -7,3 +7,4 @@ client/dist/*
 node_modules/
 .env
 npm-debug.log
+.DS_STORE
