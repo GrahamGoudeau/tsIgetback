@@ -1,9 +1,7 @@
 import * as db from './db';
-import * as utils from './utils';
-import { badRequest, jsonResponse, internalError, successResponse } from './utils';
+import { badRequest, jsonResponse, internalError, successResponse, AuthToken } from './requestUtils';
 import * as models from './models';
 import * as express from 'express';
-import * as security from './security';
 import * as mongoose from 'mongoose';
 import { Validator } from "validator.ts/Validator";
 import { LoggerModule } from './logger';
@@ -16,7 +14,7 @@ type ObjectIdTs = models.ObjectIdTs;
 
 async function handleTripCreate(req: express.Request,
                                 res: express.Response,
-                                authToken: security.AuthToken,
+                                authToken: AuthToken,
                                 cont: (query: db.CreateTripQuery) => Promise<DatabaseResult<models.ITrip>>
                                ): Promise<models.ITripModel> {
     if (!req.body) {
@@ -59,7 +57,7 @@ async function handleTripCreate(req: express.Request,
     });
 }
 
-export async function handleFromCampusCreate(req: express.Request, res: express.Response, authToken: security.AuthToken): Promise<void> {
+export async function handleFromCampusCreate(req: express.Request, res: express.Response, authToken: AuthToken): Promise<void> {
     let createdTrip: models.ITripModel;
     try {
         createdTrip = await handleTripCreate(req, res, authToken, db.createTripFromCampus);
@@ -79,7 +77,7 @@ export async function handleFromCampusCreate(req: express.Request, res: express.
     jsonResponse(res, createdTrip);
 }
 
-export async function handleFromAirportCreate(req: express.Request, res: express.Response, authToken: security.AuthToken): Promise<void> {
+export async function handleFromAirportCreate(req: express.Request, res: express.Response, authToken: AuthToken): Promise<void> {
     let createdTrip: models.ITripModel;
     try {
         createdTrip = await handleTripCreate(req, res, authToken, db.createTripFromAirport);
@@ -101,21 +99,21 @@ export async function handleFromAirportCreate(req: express.Request, res: express
 
 export async function handleJoinTripFromCampus(req: express.Request,
                                                res: express.Response,
-                                               authToken: security.AuthToken
+                                               authToken: AuthToken
                                               ): Promise<void> {
     await handleJoinTrip(req, res, authToken, db.AddToCampusOrAirport.FROM_CAMPUS);
 }
 
 export async function handleJoinTripFromAirport(req: express.Request,
                                                 res: express.Response,
-                                                authToken: security.AuthToken
+                                                authToken: AuthToken
                                                ): Promise<void> {
     await handleJoinTrip(req, res, authToken, db.AddToCampusOrAirport.FROM_AIRPORT);
 }
 
 export async function handleDeleteTrip(req: express.Request,
                                 res: express.Response,
-                                authToken: security.AuthToken,
+                                authToken: AuthToken,
                                 tripType: db.AddToCampusOrAirport
                                ): Promise<void> {
     let tripId: ObjectIdTs;
@@ -149,7 +147,7 @@ export async function handleDeleteTrip(req: express.Request,
 
 async function handleJoinTrip(req: express.Request,
                               res: express.Response,
-                              authToken: security.AuthToken,
+                              authToken: AuthToken,
                               tripType: db.AddToCampusOrAirport
                              ): Promise<void> {
     const obj: any = req.body;
@@ -189,12 +187,12 @@ async function handleJoinTrip(req: express.Request,
                     successResponse(res);
                 } else {
                     log.ERROR('unexpected error');
-                    utils.internalError(res);
+                    internalError(res);
                 }
             }
         });
     } catch (e) {
         log.ERROR('exception saving user', e);
-        utils.internalError(res);
+        internalError(res);
     }
 }

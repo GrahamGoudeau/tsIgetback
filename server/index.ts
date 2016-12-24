@@ -4,9 +4,9 @@ import * as trips from './api/trips';
 import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
 import * as utils from './api/utils';
+import { HttpMethod, RouteManager, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './routeUtils';
 import * as db from './api/db';
 import * as path from 'path';
-import { HttpMethod, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './api/utils';
 import { LoggerModule } from './api/logger';
 import { IGetBackConfig } from './config';
 
@@ -48,7 +48,7 @@ log.DEBUG(`Connecting to ${dbUrl}`);
 mongoose.connect(dbUrl);
 
 // set up routes
-const routeManager = new utils.RouteManager(app);
+const routeManager = new RouteManager(app);
 
 // route builders
 const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user/create', user.handleCreateUser)
@@ -108,7 +108,7 @@ const accountBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/acc
 
 const verifyUserBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder(`/${verifyEndpoint}/:recordId`, user.handleVerify);
 
-const catchAllBuilder: utils.InsecureRouteBuilder = new utils.InsecureRouteBuilder('/*', (req, res) => {
+const catchAllBuilder: InsecureRouteBuilder = new InsecureRouteBuilder('/*', (req, res) => {
     res.sendFile(path.resolve(`${clientDir}/../index.html`));
 });
 
