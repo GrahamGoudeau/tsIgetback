@@ -45,8 +45,8 @@ describe('The trip endpoints', () => {
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
-            college: 'Tufts University',
-            airport: 'Boston,MA|BOS'
+            college: test_utils.college,
+            airport: test_utils.airport
         }, options);
     }
 
@@ -68,8 +68,8 @@ describe('The trip endpoints', () => {
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
-            college: 'Tufts University',
-            airport: 'Boston,MA|BOS'
+            college: test_utils.college,
+            airport: test_utils.airport
         }, reqOpts1);
         const resFromAirport: IGetBackResponse = await createTrip('fromCampus', {
             tripName: makeString(20),
@@ -77,8 +77,8 @@ describe('The trip endpoints', () => {
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
-            college: 'Tufts University',
-            airport: 'Boston,MA|BOS'
+            college: test_utils.college,
+            airport: test_utils.airport
         }, reqOpts1);
 
         expect(resFromCampus.error == null).toBe(true);
