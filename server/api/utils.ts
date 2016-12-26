@@ -12,9 +12,8 @@ export function readLines(filePath: string): string[] {
     return fs.readFileSync(filePath).toString().split('\n');
 };
 
-const newStringSet = (lines: string[]) => Immutable.Set(lines);
 const linesToSet: (path: string) => Immutable.Set<string> =
-    o(newStringSet, readLines);
+    o(Immutable.Set, readLines);
 
 export class DestinationContext {
     private static INSTANCE: DestinationContext = null;
