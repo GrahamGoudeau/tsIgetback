@@ -5,6 +5,7 @@ import * as express from 'express';
 import * as mongoose from 'mongoose';
 import { Validator } from "validator.ts/Validator";
 import { LoggerModule } from './logger';
+import { DestinationContext } from './utils';
 
 const log = new LoggerModule('trips');
 const validator: Validator = new Validator();
@@ -33,6 +34,14 @@ async function handleTripCreate(req: express.Request,
     } catch (e) {
         log.DEBUG('failed to validate trip:', toValidate, e.message);
         throw e;
+    }
+
+    const destinationContext: DestinationContext = DestinationContext.getInstance();
+    if (!destinationContext.getAirportCodes().has(tripRequest.airport)) {
+        throw new Error(`Airport ${tripRequest.airport} does not exist`);
+    }
+    if (!destinationContext.getColleges().has(tripRequest.college)) {
+        throw new Error(`College ${tripRequest.college} does not exist`);
     }
 
     const query: db.CreateTripQuery = {
