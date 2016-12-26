@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as Immutable from 'immutable';
 
 export function o<A, B, C>(f: (y: B) => C,
                            g: (x: A) => B): (z: A) => C {
@@ -11,36 +12,31 @@ export function readLines(filePath: string): string[] {
     return fs.readFileSync(filePath).toString().split('\n');
 };
 
-export type ComparatorReturnValue = 0 | 1 | -1;
+const newStringSet = (lines: string[]) => Immutable.Set(lines);
+const linesToSet: (path: string) => Immutable.Set<string> =
+    o(newStringSet, readLines);
 
-// if x < y, comp(x, y) === -1
-// if x > y, comp(x, y) === 1
-// x === y, comp(x, y) === 0
-export function binaryContains<T>(array: T[], value: T, comparator?: (x: T, y: T) => ComparatorReturnValue): boolean {
-    function defaultComparator(x: T, y: T): ComparatorReturnValue {
-        if (x < y) return -1;
-        else if (x > y) return 1;
-        else return 0;
-    }
-    const comp: (x: T, y: T) => ComparatorReturnValue = comparator || defaultComparator;
-
-    const len: number = array.length;
-    if (len === 0) {
-        return false;
-    }
-
-    let upper: number = len - 1;
-    let lower: number = 0;
-    let midpoint: number = Math.floor((upper + lower) / 2);
-    while (lower < upper) {
-        if (comp(array[midpoint], value) === -1) {
-            lower = midpoint + 1;
-        } else if (comp(array[midpoint], value) === 1) {
-            upper = midpoint - 1;
-        } else {
-            return true;
+export class DestinationContext {
+    private static INSTANCE: DestinationContext = null;
+    private airportCodes: Immutable.Set<string>;
+    private colleges: Immutable.Set<string>;
+    public static getInstance() {
+        if (DestinationContext.INSTANCE == null) {
+            DestinationContext.INSTANCE = new DestinationContext();
         }
-        midpoint = Math.floor((upper + lower) / 2);
+        return DestinationContext.INSTANCE;
     }
-    return array[midpoint] === value;
+
+    private constructor() {
+        this.airportCodes = linesToSet(`${__dirname}/../data/airport-codes.dat`);
+        this.colleges = linesToSet(`${__dirname}/../data/colleges.dat`);
+    }
+
+    public getAirportCodes(): Immutable.Set<string> {
+        return this.airportCodes;
+    }
+
+    public getColleges(): Immutable.Set<string> {
+        return this.colleges;
+    }
 }
