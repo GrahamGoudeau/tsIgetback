@@ -3,7 +3,7 @@ import * as user from './api/user';
 import * as trips from './api/trips';
 import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
-import * as utils from './api/utils';
+import { DestinationContext } from './api/utils';
 import { HttpMethod, RouteManager, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './routeUtils';
 import * as db from './api/db';
 import * as path from 'path';
@@ -23,13 +23,9 @@ const clientDir: string = `${__dirname}/../client/dist/`;
 app.use('/static/', express.static(path.resolve(clientDir)));
 
 // load data files into memory
-const airportCodesFile: string = `${__dirname}/data/airport-codes.dat`;
-const collegesFile: string = `${__dirname}/data/colleges.dat`;
-
-const airportCodes: string[] = utils.readLines(airportCodesFile).sort();
-log.INFO(`Loaded ${airportCodes.length} airorts`);
-const colleges: string[] = utils.readLines(collegesFile).sort();
-log.INFO(`Loaded ${colleges.length} colleges`);
+const destinationContext: DestinationContext = DestinationContext.getInstance();
+log.INFO(`Loaded ${destinationContext.getAirportCodes().size} airorts`);
+log.INFO(`Loaded ${destinationContext.getColleges().size} colleges`);
 
 // connect to the db
 let dbUrl: string;
