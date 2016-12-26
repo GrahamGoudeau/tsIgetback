@@ -26,9 +26,9 @@ app.use('/static/', express.static(path.resolve(clientDir)));
 const airportCodesFile: string = `${__dirname}/data/airport-codes.dat`;
 const collegesFile: string = `${__dirname}/data/colleges.dat`;
 
-const airportCodes: string[] = utils.readLines(airportCodesFile);
+const airportCodes: string[] = utils.readLines(airportCodesFile).sort();
 log.INFO(`Loaded ${airportCodes.length} airorts`);
-const colleges: string[] = utils.readLines(collegesFile);
+const colleges: string[] = utils.readLines(collegesFile).sort();
 log.INFO(`Loaded ${colleges.length} colleges`);
 
 // connect to the db
