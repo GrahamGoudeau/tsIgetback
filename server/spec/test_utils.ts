@@ -7,6 +7,8 @@ import { AuthToken, IGetBackResponse } from '../api/requestUtils';
 const config: IGetBackConfig = IGetBackConfig.getInstance();
 const portNumber = config.getNumberConfig('PORT');
 const rootUrl = `http://localhost:${portNumber}`;
+export const airport: string = 'Boston, MA|BOS';
+export const college: string = 'Tufts University';
 
 export function makeEndpoint(endpoint: string): string {
     return `${rootUrl}/api/${endpoint}/`;
