@@ -14,3 +14,10 @@ export function readLines(filePath: string): string[] {
 
 export const linesToSet: (path: string) => Immutable.Set<string> =
     o(Immutable.Set, readLines);
+
+export function defaults<T>(value: T, other: T): T {
+    if (value == null) {
+        return other;
+    }
+    return value;
+}

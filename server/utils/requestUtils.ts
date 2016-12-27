@@ -1,4 +1,5 @@
 import * as express from 'express';
+import { defaults } from './functionalUtils';
 
 export interface AuthToken {
     email: string,
@@ -28,19 +29,19 @@ function buildIGetBackError(message: string, error?: any): IGetBackResponse {
 }
 
 export function badRequest(res: express.Response, message?: string, error?: any): void {
-    const response: IGetBackResponse = buildIGetBackError(message == null ? 'bad request' : message, error);
+    const response: IGetBackResponse = buildIGetBackError(defaults(message, 'bad request'), error);
 
     res.status(400).json(response);
 }
 
 export function internalError(res: express.Response, message?: string, error?: any): void {
-    const response: IGetBackResponse = buildIGetBackError(message == null ? 'internal server error' : message, error);
+    const response: IGetBackResponse = buildIGetBackError(defaults(message, 'internal server error'), error);
 
     res.status(500).json(response);
 }
 
 export function unauthorizedError(res: express.Response, message?: string, error?: any): void {
-    const response: IGetBackResponse = buildIGetBackError(message == null ? 'unauthorized' : message, error);
+    const response: IGetBackResponse = buildIGetBackError(defaults(message, 'unauthorized'), error);
 
     res.status(401).json(response);
 }
