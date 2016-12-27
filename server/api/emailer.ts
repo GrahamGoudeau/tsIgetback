@@ -1,4 +1,4 @@
-import { o } from './utils';
+import { o } from '../utils/functionalUtils';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
 import { LoggerModule } from './logger';

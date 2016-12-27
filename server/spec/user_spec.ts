@@ -1,5 +1,5 @@
 import * as models from '../api/models';
-import { IGetBackResponse, AuthToken } from '../api/requestUtils';
+import { IGetBackResponse, AuthToken } from '../utils/requestUtils';
 import * as test_utils from './test_utils';
 import * as WebRequest from 'web-request';
 

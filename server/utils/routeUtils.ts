@@ -1,7 +1,7 @@
 import * as express from 'express';
-import * as security from './api/security';
+import * as security from '../api/security';
 import * as tsmonad from 'tsmonad';
-import { unauthorizedError, AuthToken } from './api/requestUtils';
+import { unauthorizedError, AuthToken } from './requestUtils';
 
 export type InsecureContinuation = (req: express.Request,
                                     res: express.Response) => void;

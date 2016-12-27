@@ -1,7 +1,7 @@
 import * as WebRequest from 'web-request';
 import * as models from '../api/models';
 import { IGetBackConfig } from '../config';
-import { AuthToken, IGetBackResponse } from '../api/requestUtils';
+import { AuthToken, IGetBackResponse } from '../utils/requestUtils';
 
 
 const config: IGetBackConfig = IGetBackConfig.getInstance();

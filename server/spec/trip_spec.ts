@@ -1,7 +1,7 @@
 import * as models from '../api/models';
 import * as test_utils from './test_utils';
 import { makeString, makeEndpoint } from './test_utils';
-import { IGetBackResponse } from '../api/requestUtils';
+import { IGetBackResponse } from '../utils/requestUtils';
 import * as WebRequest from 'web-request';
 /*
 import { AuthToken } from '../api/security';

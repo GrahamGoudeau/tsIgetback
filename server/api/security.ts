@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import * as tsmonad from 'tsmonad';
-import { AuthToken } from './requestUtils';
+import { AuthToken } from '../utils/requestUtils';
 import { LoggerModule } from './logger';
 import { IGetBackConfig } from '../config';
 

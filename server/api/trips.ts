@@ -1,11 +1,11 @@
 import * as db from './db';
-import { badRequest, jsonResponse, internalError, successResponse, AuthToken } from './requestUtils';
+import { badRequest, jsonResponse, internalError, successResponse, AuthToken } from '../utils/requestUtils';
 import * as models from './models';
 import * as express from 'express';
 import * as mongoose from 'mongoose';
 import { Validator } from "validator.ts/Validator";
 import { LoggerModule } from './logger';
-import { DestinationContext } from './utils';
+import { DestinationContext } from '../destinationContext';
 
 const log = new LoggerModule('trips');
 const validator: Validator = new Validator();

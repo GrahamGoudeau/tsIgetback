@@ -1,6 +1,6 @@
 import * as db from './db';
-import * as utils from './utils';
-import { badRequest, jsonResponse, internalError, successResponse, unauthorizedError, AuthToken } from './requestUtils';
+import * as utils from '../utils/functionalUtils';
+import { badRequest, jsonResponse, internalError, successResponse, unauthorizedError, AuthToken } from '../utils/requestUtils';
 import * as models from './models';
 import * as express from 'express';
 import * as security from './security';
