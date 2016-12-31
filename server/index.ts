@@ -111,6 +111,16 @@ const fromAirportSubscribeBuilder = <SecureRouteBuilder>new SecureRouteBuilder('
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
 
+const fromCampusSubscribeGetBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/subscribe/fromCampus', async (req, res, token) => {
+    await user.handleGetSubscriptions(req, res, token, db.AddToCampusOrAirport.FROM_CAMPUS);
+})
+    .setIsAjax(true);
+
+const fromAirportSubscribeGetBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/subscribe/fromAirport', async (req, res, token) => {
+    await user.handleGetSubscriptions(req, res, token, db.AddToCampusOrAirport.FROM_AIRPORT);
+})
+    .setIsAjax(true);
+
 const accountBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/account', user.handleGetAccount)
     .setIsAjax(true);
 
@@ -137,6 +147,8 @@ const fromCampusSearchRoute: SecureRoute = new SecureRoute(fromCampusSearchBuild
 const fromAirportSearchRoute: SecureRoute = new SecureRoute(fromAirportSearchBuilder);
 const fromCampusSubscribeRoute: SecureRoute = new SecureRoute(fromCampusSubscribeBuilder);
 const fromAirportSubscribeRoute: SecureRoute = new SecureRoute(fromAirportSubscribeBuilder);
+const fromCampusSubscribeGetRoute: SecureRoute = new SecureRoute(fromCampusSubscribeGetBuilder);
+const fromAirportSubscribeGetRoute: SecureRoute = new SecureRoute(fromAirportSubscribeGetBuilder);
 const verifyUserRoute: InsecureRoute = new InsecureRoute(verifyUserBuilder);
 
 const insecureRoutes = [
@@ -161,6 +173,8 @@ const secureRoutes = [
     fromAirportSearchRoute,
     fromCampusSubscribeRoute,
     fromAirportSubscribeRoute,
+    fromCampusSubscribeGetRoute,
+    fromAirportSubscribeGetRoute,
 ];
 
 routeManager.addSecureRoutes(secureRoutes);

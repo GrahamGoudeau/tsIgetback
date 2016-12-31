@@ -175,3 +175,17 @@ export async function handleSubscribe(req: express.Request,
     await db.subscribeUser(subscription, tripType);
     successResponse(res);
 }
+
+export async function handleGetSubscriptions(req: express.Request,
+                                             res: express.Response,
+                                             authToken: AuthToken,
+                                             tripType: db.AddToCampusOrAirport): Promise<void> {
+    const results: db.DatabaseResult<models.ISubscriptionModel[]> = await db.getSubscriptions(authToken.email, tripType);
+    results.caseOf({
+        right: subscriptions => jsonResponse(res, subscriptions),
+        left: e => {
+            log.ERROR('Could not get subscriptions:', e);
+            internalError(res);
+        }
+    });
+}
