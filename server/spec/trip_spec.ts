@@ -41,7 +41,7 @@ describe('The trip endpoints', () => {
     async function createValidTrip(fromDestination: 'fromCampus' | 'fromAirport', options: any): Promise<IGetBackResponse> {
         return await createTrip(fromDestination, {
             tripName: makeString(20),
-            tripDate: new Date(),
+            tripDate: test_utils.randDateStr(),
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
@@ -64,7 +64,7 @@ describe('The trip endpoints', () => {
     it('can create both kinds of trips', async (done) => {
         const resFromCampus: IGetBackResponse = await createTrip('fromCampus', {
             tripName: makeString(20),
-            tripDate: new Date(),
+            tripDate: test_utils.randDateStr(),
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
@@ -73,7 +73,7 @@ describe('The trip endpoints', () => {
         }, reqOpts1);
         const resFromAirport: IGetBackResponse = await createTrip('fromCampus', {
             tripName: makeString(20),
-            tripDate: new Date(),
+            tripDate: test_utils.randDateStr(),
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
