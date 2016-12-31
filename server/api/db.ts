@@ -44,6 +44,13 @@ export interface CreateTripQuery {
     airport: string;
 }
 
+export interface SearchTripsQuery {
+    tripDate: Date;
+    tripHour: number;
+    college: string;
+    airport: string;
+}
+
 function hashPassword(email: string, password: string) {
     return security.hashPassword(email, password);
 }
@@ -230,17 +237,33 @@ export async function getVerificationRecord(id: string): Promise<DatabaseResult<
     return Either.right(rec);
 }
 
+function getTripModel(tripType: AddToCampusOrAirport): mongoose.Model<models.ITripModel> {
+    if (tripType == AddToCampusOrAirport.FROM_CAMPUS) {
+        return models.FromCampus;
+    } else {
+        return models.FromAirport;
+    }
+}
+
+export async function searchTrips(query: SearchTripsQuery, tripType: AddToCampusOrAirport): Promise<DatabaseResult<models.ITripModel[]>> {
+    const model: mongoose.Model<models.ITripModel> = getTripModel(tripType);
+    const results: models.ITripModel[] = await model.find(query);
+    if (results == null) {
+        return Either.left(DatabaseErrorMessage.NOT_FOUND);
+    }
+
+    return Either.right(results);
+}
+
 export async function deleteTrip(tripId: ObjectIdTs, ownerEmail: string, tripType: AddToCampusOrAirport): Promise<DatabaseResult<boolean>> {
     const isCampus = tripType === AddToCampusOrAirport.FROM_CAMPUS;
-    let model: mongoose.Model<models.ITripModel>;
+    const model: mongoose.Model<models.ITripModel> = getTripModel(tripType);
     let ownedField: string;
     let memberField: string;
     if (isCampus) {
-        model = models.FromCampus;
         ownedField = 'ownedTripsFromCampus';
         memberField = 'memberTripsFromCampus';
     } else {
-        model = models.FromAirport;
         ownedField = 'ownedTripsFromAirport';
         memberField = 'memberTripsFromAirport';
     }
