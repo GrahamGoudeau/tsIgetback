@@ -100,3 +100,23 @@ Actions for trips from campus to the airport are identical to each other; the on
     * Replace `:tripId` above with the ID of the trip in question, e.g. 58539381c02e8054e48fc93a.
   * Response format:
     * Status code 200 if successful, no other data returned
+* `from{Campus,Airport}/search` - search for matching trips
+  * Request format:
+    * Example body:
+    ```
+    {
+      "tripDate": "03/21/2017", // must be in MM/dd/YYYY format
+      "tripHour": 13,
+      "college": "Tufts University", // must be one of the colleges in server/data/colleges.dat
+      "airport": "Boston, MA|BOS" // must be an airport from server/data/airport-codes.dat
+    }
+    ```
+  * Response format:
+    * Example body (instead of an object, the `"data"` field is an array of matching trips):
+    ```
+    {
+      "data": [
+        // found trips
+      ]
+    }
+    ```
