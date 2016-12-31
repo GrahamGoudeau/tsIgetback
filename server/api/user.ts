@@ -6,11 +6,13 @@ import * as express from 'express';
 import * as security from './security';
 import { LoggerModule } from './logger';
 import { getEmailerInstance, IEmailer } from './emailer';
+import * as mongoose from 'mongoose';
 
 const log = new LoggerModule('user');
 const emailer: IEmailer = getEmailerInstance();
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type IUser = models.IUser;
+type ObjectIdTs = models.ObjectIdTs;
 
 export async function handleCreateUser(req: express.Request, res: express.Response): Promise<void> {
     const obj: any = req.body;
@@ -188,4 +190,30 @@ export async function handleGetSubscriptions(req: express.Request,
             internalError(res);
         }
     });
+}
+
+export async function handleUnsubscribe(req: express.Request,
+                                        res: express.Response,
+                                        authToken: AuthToken,
+                                        tripType: db.AddToCampusOrAirport): Promise<void> {
+    if (!req.params.subscriptionId) {
+        badRequest(res, 'missing URL param');
+        return;
+    }
+    let subscriptionId: ObjectIdTs;
+    try {
+        subscriptionId = mongoose.Types.ObjectId(req.params.subscriptionId);
+    } catch (e) {
+        log.DEBUG('failed to convert to mongo object ID', req.params.subscriptionId);
+        badRequest(res, 'bad subscription ID');
+        return;
+    }
+
+    try {
+        await db.unsubscribe(subscriptionId, tripType);
+    } catch (e) {
+        log.ERROR('Could not unsubscribe:', e.message);
+        internalError(res);
+    }
+    successResponse(res);
 }
