@@ -72,3 +72,17 @@ export async function getUser(options: any): Promise<models.IUser> {
     );
     return userResponse.data;
 }
+
+export function getDateString(date: Date): string {
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+}
+
+export function randomDate(): Date {
+    const start: Date = new Date(0);
+    const end: Date = new Date('05/21/2017');
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+export function randDateStr(): string {
+    return getDateString(randomDate());
+}
