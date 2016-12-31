@@ -295,6 +295,21 @@ export async function subscribeUser(newSubscription: models.ISubscription, tripT
     await model.create(newSubscription);
 }
 
+export async function unsubscribe(subscriptionId: ObjectIdTs, tripType: AddToCampusOrAirport): Promise<void> {
+    const model: mongoose.Model<models.ISubscriptionModel> = getSubscriptionModel(tripType);
+    await model.remove({
+        _id: subscriptionId
+    });
+}
+
+export async function getSubscriptions(ownerEmail: string, tripType: AddToCampusOrAirport): Promise<DatabaseResult<models.ISubscriptionModel[]>> {
+    const model: mongoose.Model<models.ISubscriptionModel> = getSubscriptionModel(tripType);
+    const result: models.ISubscriptionModel[] = await model.find({
+        email: ownerEmail
+    });
+    return Either.right(result);
+}
+
 export async function getSubscribers(query: SearchTripsQuery, tripType: AddToCampusOrAirport): Promise<DatabaseResult<models.ISubscriptionModel[]>> {
     const model: mongoose.Model<models.ISubscriptionModel> = getSubscriptionModel(tripType);
     const result: models.ISubscriptionModel[] = await model.find({
