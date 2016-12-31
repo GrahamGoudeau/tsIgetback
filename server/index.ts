@@ -87,6 +87,18 @@ const fromAirportDeleteBuider = <SecureRouteBuilder>new SecureRouteBuilder('/api
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.DELETE);
 
+const fromCampusSearchBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/search', (req, res, token) => {
+    trips.handleSearch(req, res, token, db.AddToCampusOrAirport.FROM_CAMPUS);
+})
+    .setIsAjax(true)
+    .setHttpMethod(HttpMethod.POST);
+
+const fromAirportSearchBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/search', (req, res, token) => {
+    trips.handleSearch(req, res, token, db.AddToCampusOrAirport.FROM_AIRPORT);
+})
+    .setIsAjax(true)
+    .setHttpMethod(HttpMethod.POST);
+
 const fromCampusSubscribeBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/subscribe/fromCampus', async (req, res, token) => {
     await user.handleSubscribe(req, res, token, db.AddToCampusOrAirport.FROM_CAMPUS);
 })
@@ -121,6 +133,8 @@ const fromCampusJoinRoute: SecureRoute = new SecureRoute(fromCampusJoinBuilder);
 const fromAirportJoinRoute: SecureRoute = new SecureRoute(fromAirportJoinBuilder);
 const fromCampusDeleteRoute: SecureRoute = new SecureRoute(fromCampusDeleteBuider);
 const fromAirportDeleteRoute: SecureRoute = new SecureRoute(fromAirportDeleteBuider);
+const fromCampusSearchRoute: SecureRoute = new SecureRoute(fromCampusSearchBuilder);
+const fromAirportSearchRoute: SecureRoute = new SecureRoute(fromAirportSearchBuilder);
 const fromCampusSubscribeRoute: SecureRoute = new SecureRoute(fromCampusSubscribeBuilder);
 const fromAirportSubscribeRoute: SecureRoute = new SecureRoute(fromAirportSubscribeBuilder);
 const verifyUserRoute: InsecureRoute = new InsecureRoute(verifyUserBuilder);
@@ -143,6 +157,8 @@ const secureRoutes = [
     fromAirportJoinRoute,
     fromCampusDeleteRoute,
     fromAirportDeleteRoute,
+    fromCampusSearchRoute,
+    fromAirportSearchRoute,
     fromCampusSubscribeRoute,
     fromAirportSubscribeRoute,
 ];
