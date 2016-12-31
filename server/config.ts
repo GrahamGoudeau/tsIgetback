@@ -32,7 +32,8 @@ export class IGetBackConfig {
             'SPARKPOST_API_KEY',
         ],
         numberFields: [
-            'PORT'
+            'PORT',
+            'SEARCH_RANGE',
         ]
     };
     private typeMapping = {};
