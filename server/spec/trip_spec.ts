@@ -3,10 +3,7 @@ import * as test_utils from './test_utils';
 import { makeString, makeEndpoint } from './test_utils';
 import { IGetBackResponse } from '../utils/requestUtils';
 import * as WebRequest from 'web-request';
-/*
-import { AuthToken } from '../api/security';
-import * as WebRequest from 'web-request';
-*/
+import { getDateString } from '../utils/functionalUtils';
 
 describe('The trip endpoints', () => {
     let globalUser1: models.IUser;
@@ -151,7 +148,7 @@ describe('The trip endpoints', () => {
                     method: 'POST',
                     json: true,
                     body: {
-                        tripDate: test_utils.getDateString(new Date(res.data.tripDate)),
+                        tripDate: getDateString(new Date(res.data.tripDate)),
                         tripHour: res.data.tripHour,
                         college: res.data.college,
                         airport: res.data.airport

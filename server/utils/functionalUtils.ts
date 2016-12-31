@@ -21,3 +21,7 @@ export function defaults<T>(value: T, other: T): T {
     }
     return value;
 }
+
+export function getDateString(date: Date): string {
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+}

@@ -2,6 +2,7 @@ import * as WebRequest from 'web-request';
 import * as models from '../api/models';
 import { IGetBackConfig } from '../config';
 import { AuthToken, IGetBackResponse } from '../utils/requestUtils';
+import { getDateString } from '../utils/functionalUtils';
 
 
 const config: IGetBackConfig = IGetBackConfig.getInstance();
@@ -71,10 +72,6 @@ export async function getUser(options: any): Promise<models.IUser> {
         }, options)
     );
     return userResponse.data;
-}
-
-export function getDateString(date: Date): string {
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
 }
 
 export function randomDate(): Date {
