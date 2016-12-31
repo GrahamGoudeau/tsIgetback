@@ -4,6 +4,7 @@ import * as handlebars from 'handlebars';
 import { LoggerModule } from './logger';
 import { IGetBackConfig } from '../config';
 import * as SparkPost from 'sparkpost';
+import { getDateString } from '../utils/functionalUtils';
 
 const templateDir: string = `${__dirname}/../data/templates/`;
 
@@ -12,12 +13,14 @@ const compileFromTemplateSource: (fileName: string) => HandlebarsTemplateDelegat
 
 const templates = {
     'userVerification': compileFromTemplateSource('userVerification.html'),
-    'errorReport': compileFromTemplateSource('errorReport.html')
+    'errorReport': compileFromTemplateSource('errorReport.html'),
+    'subscriberNotification': compileFromTemplateSource('subscriberNotification.html'),
 }
 
 export interface IEmailer {
     userVerification: (firstName: string, email: string, recordId: string) => Promise<boolean>;
     errorAlert: (message: string) => Promise<void>;
+    subscriberNotification: (recipients: string[], origin: string, destination: string, tripDate: Date, tripHour: number, tripQuarterHour: number, contactEmail: string) => Promise<void>
 }
 
 class ProductionEmailer implements IEmailer {
@@ -65,6 +68,45 @@ class ProductionEmailer implements IEmailer {
         });
     }
 
+    public async subscriberNotification(recipients: string[], origin: string, destination: string, tripDate: Date, tripHour: number, tripQuarterHour: number, contactEmail: string): Promise<void> {
+        if (recipients.length == 0) {
+            this.log.DEBUG('No recipients for notifications');
+            return;
+        }
+
+        try {
+            const toAddresses: {address: string}[] = recipients.map((recipient: string) => {
+                return {
+                    address: recipient
+                };
+            });
+            const sendTripHour: string = `${tripHour > 12 ? (tripHour - 12) : tripHour}`;
+            const amOrPm: string = `${tripHour > 12 ? 'PM' : 'AM'}`;
+            console.log(toAddresses);
+            const res = await this.sparkPostClient.transmissions.send({
+                content: {
+                    from: this.fromAddress,
+                    subject: 'IGetBack Notification',
+                    html: templates.subscriberNotification({
+                        origin: origin,
+                        destination: destination,
+                        tripDate: getDateString(tripDate),
+                        tripHour: sendTripHour,
+                        tripQuarterHour: tripQuarterHour,
+                        contactEmail: contactEmail,
+                        amOrPm: amOrPm
+                    })
+                },
+                recipients: toAddresses
+            });
+            if (res.results.total_accepted_recipients !== recipients.length) {
+                this.log.ERROR('Failed to send all notifications to subscribers');
+            }
+        } catch (e) {
+            this.log.ERROR('Exception sending notifications:', e.message);
+        }
+    }
+
     public async userVerification(firstName: string, email: string, recordId: string): Promise<boolean> {
         try {
             const res = await this.sparkPostClient.transmissions.send({
@@ -80,7 +122,6 @@ class ProductionEmailer implements IEmailer {
                     {address: email}
                 ]
             });
-            this.log.INFO(res);
             return res.results.total_accepted_recipients === 1;
         } catch (e) {
             this.log.ERROR('Exception while sending');
@@ -112,6 +153,10 @@ class DisabledEmailer implements IEmailer {
 
     public async errorAlert(message: string) {
         this.log.INFO('Not sending error alert email');
+    }
+
+    public async subscriberNotification(recipients: string[], origin: string, destination: string, tripDate: Date, tripHour: number, tripQuarterHour: number, contactEmail: string): Promise<void> {
+        this.log.INFO('Not notifying subscribers');
     }
 }
 
