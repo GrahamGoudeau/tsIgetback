@@ -120,6 +120,43 @@ export async function handleJoinTripFromAirport(req: express.Request,
     await handleJoinTrip(req, res, authToken, db.AddToCampusOrAirport.FROM_AIRPORT);
 }
 
+export async function handleSearch(req: express.Request,
+                                   res: express.Response,
+                                   authToken: AuthToken,
+                                   tripType: db.AddToCampusOrAirport
+                                  ): Promise<void> {
+    if (!req.body) {
+        badRequest(res, 'missing request body');
+        return;
+    }
+
+    const body: any = req.body;
+    if (!body.tripDate ||
+            !body.tripHour ||
+            !body.college ||
+            !body.airport) {
+        badRequest(res, 'missing fields');
+        return;
+    }
+
+    const dbResults: DatabaseResult<models.ITripModel[]> = await db.searchTrips({
+        tripDate: body.tripDate,
+        tripHour: body.tripHour,
+        college: body.college,
+        airport: body.airport
+    }, tripType);
+
+    dbResults.caseOf({
+        left: e => {
+            log.DEBUG('db exception when searching for trips', e);
+            jsonResponse(res, []);
+        },
+        right: results => jsonResponse(res, results.filter((res: models.ITripModel) => {
+            return res.ownerEmail !== authToken.email;
+        }))
+    });
+}
+
 export async function handleDeleteTrip(req: express.Request,
                                 res: express.Response,
                                 authToken: AuthToken,

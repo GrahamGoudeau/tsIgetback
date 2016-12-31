@@ -41,7 +41,7 @@ describe('The trip endpoints', () => {
     async function createValidTrip(fromDestination: 'fromCampus' | 'fromAirport', options: any): Promise<IGetBackResponse> {
         return await createTrip(fromDestination, {
             tripName: makeString(20),
-            tripDate: new Date(),
+            tripDate: test_utils.randDateStr(),
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
@@ -64,7 +64,7 @@ describe('The trip endpoints', () => {
     it('can create both kinds of trips', async (done) => {
         const resFromCampus: IGetBackResponse = await createTrip('fromCampus', {
             tripName: makeString(20),
-            tripDate: new Date(),
+            tripDate: test_utils.randDateStr(),
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
@@ -73,7 +73,7 @@ describe('The trip endpoints', () => {
         }, reqOpts1);
         const resFromAirport: IGetBackResponse = await createTrip('fromCampus', {
             tripName: makeString(20),
-            tripDate: new Date(),
+            tripDate: test_utils.randDateStr(),
             maxOtherMembers: 3,
             tripHour: 12,
             tripQuarterHour: 45,
@@ -142,4 +142,29 @@ describe('The trip endpoints', () => {
         }
     });
 
+    it('can search and retrieve created trips', async (done) => {
+        try {
+            const res = await createValidTrip('fromCampus', reqOpts1);
+            const searchRes = await WebRequest.json<IGetBackResponse>(
+                makeEndpoint('fromCampus/search'),
+                Object.assign({}, {
+                    method: 'POST',
+                    json: true,
+                    body: {
+                        tripDate: test_utils.getDateString(new Date(res.data.tripDate)),
+                        tripHour: res.data.tripHour,
+                        college: res.data.college,
+                        airport: res.data.airport
+                    }
+                }, reqOpts2)
+            );
+            expect(searchRes.data).not.toBeUndefined();
+            expect(searchRes.data.length).toBe(1);
+            expect(searchRes.data[0].tripName).toBe(res.data.tripName);
+            done();
+        } catch (e) {
+            console.log(e);
+            fail();
+        }
+    });
 });
