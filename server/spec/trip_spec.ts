@@ -142,4 +142,29 @@ describe('The trip endpoints', () => {
         }
     });
 
+    it('can search and retrieve created trips', async (done) => {
+        try {
+            const res = await createValidTrip('fromCampus', reqOpts1);
+            const searchRes = await WebRequest.json<IGetBackResponse>(
+                makeEndpoint('fromCampus/search'),
+                Object.assign({}, {
+                    method: 'POST',
+                    json: true,
+                    body: {
+                        tripDate: test_utils.getDateString(new Date(res.data.tripDate)),
+                        tripHour: res.data.tripHour,
+                        college: res.data.college,
+                        airport: res.data.airport
+                    }
+                }, reqOpts2)
+            );
+            expect(searchRes.data).not.toBeUndefined();
+            expect(searchRes.data.length).toBe(1);
+            expect(searchRes.data[0].tripName).toBe(res.data.tripName);
+            done();
+        } catch (e) {
+            console.log(e);
+            fail();
+        }
+    });
 });
