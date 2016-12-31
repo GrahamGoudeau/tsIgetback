@@ -245,6 +245,14 @@ function getTripModel(tripType: AddToCampusOrAirport): mongoose.Model<models.ITr
     }
 }
 
+function getSubscriptionModel(tripType: AddToCampusOrAirport): mongoose.Model<models.ISubscriptionModel> {
+    if (tripType == AddToCampusOrAirport.FROM_CAMPUS) {
+        return models.FromCampusSubscription;
+    } else {
+        return models.FromAirportSubscription;
+    }
+}
+
 export async function searchTrips(query: SearchTripsQuery, tripType: AddToCampusOrAirport): Promise<DatabaseResult<models.ITripModel[]>> {
     const model: mongoose.Model<models.ITripModel> = getTripModel(tripType);
     const results: models.ITripModel[] = await model.find(query);
@@ -283,11 +291,28 @@ export async function deleteTrip(tripId: ObjectIdTs, ownerEmail: string, tripTyp
 }
 
 export async function subscribeUser(newSubscription: models.ISubscription, tripType: AddToCampusOrAirport): Promise<void> {
-    let model: mongoose.Model<models.ISubscriptionModel>;
-    if (tripType === AddToCampusOrAirport.FROM_CAMPUS) {
-        model = models.FromCampusSubscription;
-    } else {
-        model = models.FromAirportSubscription;
-    }
+    const model: mongoose.Model<models.ISubscriptionModel> = getSubscriptionModel(tripType);
     await model.create(newSubscription);
+}
+
+export async function getSubscribers(query: SearchTripsQuery, tripType: AddToCampusOrAirport): Promise<DatabaseResult<models.ISubscriptionModel[]>> {
+    const model: mongoose.Model<models.ISubscriptionModel> = getSubscriptionModel(tripType);
+    const result: models.ISubscriptionModel[] = await model.find({
+        airport: query.airport,
+        college: query.college,
+        tripDate: query.tripDate
+    });
+    if (result == null) {
+        return Either.left(DatabaseErrorMessage.NOT_FOUND);
+    }
+    return Either.right(result);
+}
+
+export async function getSubscribersInRange(query: SearchTripsQuery, hourRange: number, tripType: AddToCampusOrAirport): Promise<DatabaseResult<models.ISubscriptionModel[]>> {
+    const results: DatabaseResult<models.ISubscriptionModel[]> = await getSubscribers(query, tripType);
+    return results.bind((results: models.ISubscriptionModel[]) => {
+        return Either.right(results.filter((result: models.ISubscriptionModel) => {
+            return Math.abs(result.tripHour - query.tripHour) <= hourRange;
+        }));
+    });
 }

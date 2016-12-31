@@ -35,11 +35,11 @@ export class Trip {
 
 export interface ITrip extends Trip {
     ownerEmail: string;
-    maxOtherMembers: Number;
+    maxOtherMembers: number;
     tripMemberEmails: string[];
     tripDate: Date;
-    tripHour: Number;
-    tripQuarterHour: Number;
+    tripHour: number;
+    tripQuarterHour: number;
     tripName: string;
     college: string;
     airport: string
