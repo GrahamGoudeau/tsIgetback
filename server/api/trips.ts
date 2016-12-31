@@ -6,8 +6,13 @@ import * as mongoose from 'mongoose';
 import { Validator } from "validator.ts/Validator";
 import { LoggerModule } from './logger';
 import { DestinationContext } from '../destinationContext';
+import { IGetBackConfig } from '../config';
+import { Either } from 'tsmonad';
+import { getEmailerInstance, IEmailer } from './emailer';
+import { Set } from 'immutable';
 
 const log = new LoggerModule('trips');
+const config = IGetBackConfig.getInstance();
 const validator: Validator = new Validator();
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type ITrip = models.ITrip;
@@ -83,7 +88,36 @@ export async function handleFromCampusCreate(req: express.Request, res: express.
         internalError(res, 'problem saving to user');
         return;
     }
+
+    notifySubscribers(createdTrip, db.AddToCampusOrAirport.FROM_CAMPUS);
     jsonResponse(res, createdTrip);
+}
+
+async function notifySubscribers(trip: models.ITripModel, tripType: db.AddToCampusOrAirport): Promise<void> {
+    const hourRange: number = config.getNumberConfig('SEARCH_RANGE');
+    const query: db.SearchTripsQuery = {
+        tripDate: trip.tripDate,
+        tripHour: trip.tripHour,
+        college: trip.college,
+        airport: trip.airport
+    };
+    const subscriberResults: db.DatabaseResult<models.ISubscriptionModel[]> = await db.getSubscribersInRange(query, hourRange, tripType);
+    subscriberResults.bind((subscriptions: models.ISubscriptionModel[]) => {
+        const allEmails = subscriptions.map((subscriber: models.ISubscriptionModel) => {
+            return subscriber.email;
+        });
+        const emailSet: Set<string> = Set(allEmails);
+        const recipients: string[] = emailSet.filter((email: string) => {
+            return email !== trip.ownerEmail;
+        }).toArray();
+
+        const emailer: IEmailer = getEmailerInstance();
+        const origin: string = tripType === db.AddToCampusOrAirport.FROM_CAMPUS ? trip.college : trip.airport;
+        const destination: string = tripType === db.AddToCampusOrAirport.FROM_CAMPUS ? trip.airport : trip.college;
+
+        emailer.subscriberNotification(recipients, origin, destination, trip.tripDate, trip.tripHour, trip.tripQuarterHour, trip.ownerEmail);
+        return Either.right(subscriptions);
+    });
 }
 
 export async function handleFromAirportCreate(req: express.Request, res: express.Response, authToken: AuthToken): Promise<void> {
@@ -103,6 +137,8 @@ export async function handleFromAirportCreate(req: express.Request, res: express
         internalError(res, 'problem saving to user');
         return;
     }
+
+    notifySubscribers(createdTrip, db.AddToCampusOrAirport.FROM_AIRPORT);
     jsonResponse(res, createdTrip);
 }
 
