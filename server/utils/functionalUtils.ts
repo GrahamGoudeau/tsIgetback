@@ -25,3 +25,17 @@ export function defaults<T>(value: T, other: T): T {
 export function getDateString(date: Date): string {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
 }
+
+export function getAllRegexMatches(input: string, pattern: string): string[] {
+    const result: string[] = [];
+    let m: RegExpExecArray = null;
+    const regex: RegExp = new RegExp(pattern, 'g');
+    do {
+        m = regex.exec(input);
+        console.log('running:', m);
+        if (m) {
+            result.push(m[1]);
+        }
+    } while (m);
+    return result;
+}

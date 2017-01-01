@@ -3,6 +3,7 @@ import * as tsmonad from 'tsmonad';
 import { AuthToken } from '../utils/requestUtils';
 import { LoggerModule } from './logger';
 import { IGetBackConfig } from '../config';
+import { getAllRegexMatches } from '../utils/functionalUtils';
 
 const log = new LoggerModule('security');
 const Maybe = tsmonad.Maybe;
@@ -68,14 +69,11 @@ export function parseCookie(cookie: string): Maybe<AuthToken> {
     }
 
     const cookiePrelude: string = 'IgetbackAuth=';
-    const authRegex = new RegExp(`${cookiePrelude}([a-f0-9]+)`);
-    const match: RegExpExecArray = authRegex.exec(cookie);
 
-    if (match == null) {
-        return fail;
-    }
+    const allMatches: string[] = getAllRegexMatches(cookie, `${cookiePrelude}([a-f0-9]+)`);
 
-    const token: string = match[1];
+    // attempt to get the latest cookie added to the session- not great
+    const token = allMatches[allMatches.length - 1];
     try {
         const deserializedResult: any = JSON.parse(decrypt(token));
         if (!deserializedResult.email || !deserializedResult.authorizedAt) {
