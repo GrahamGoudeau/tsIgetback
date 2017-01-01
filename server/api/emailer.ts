@@ -11,11 +11,22 @@ const templateDir: string = `${__dirname}/../data/templates/`;
 const compileFromTemplateSource: (fileName: string) => HandlebarsTemplateDelegate
         = o(handlebars.compile, x => fs.readFileSync(`${templateDir}/${x}`, 'utf8'));
 
+function registerPartials(partials: string[]): void {
+    partials.forEach((partialName: string) => {
+        handlebars.registerPartial(partialName, fs.readFileSync(`${templateDir}/${partialName}.html`, 'utf8'));
+    });
+}
+
 const templates = {
     'userVerification': compileFromTemplateSource('userVerification.html'),
     'errorReport': compileFromTemplateSource('errorReport.html'),
     'subscriberNotification': compileFromTemplateSource('subscriberNotification.html'),
 }
+
+const partials: string[] = [
+    'supportPartial',
+];
+registerPartials(partials);
 
 export interface IEmailer {
     userVerification: (firstName: string, email: string, recordId: string) => Promise<boolean>;
