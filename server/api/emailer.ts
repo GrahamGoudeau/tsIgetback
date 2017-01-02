@@ -6,28 +6,6 @@ import { IGetBackConfig } from '../config';
 import * as SparkPost from 'sparkpost';
 import { getDateString } from '../utils/functionalUtils';
 
-const templateDir: string = `${__dirname}/../data/templates/`;
-
-const compileFromTemplateSource: (fileName: string) => HandlebarsTemplateDelegate
-        = o(handlebars.compile, x => fs.readFileSync(`${templateDir}/${x}`, 'utf8'));
-
-function registerPartials(partials: string[]): void {
-    partials.forEach((partialName: string) => {
-        handlebars.registerPartial(partialName, fs.readFileSync(`${templateDir}/${partialName}.html`, 'utf8'));
-    });
-}
-
-const templates = {
-    'userVerification': compileFromTemplateSource('userVerification.html'),
-    'errorReport': compileFromTemplateSource('errorReport.html'),
-    'subscriberNotification': compileFromTemplateSource('subscriberNotification.html'),
-}
-
-const partials: string[] = [
-    'supportPartial',
-];
-registerPartials(partials);
-
 export interface IEmailer {
     userVerification: (firstName: string, email: string, recordId: string) => Promise<boolean>;
     errorAlert: (message: string) => Promise<void>;
@@ -42,6 +20,35 @@ class ProductionEmailer implements IEmailer {
     private readonly sparkPostClient = null;
     private readonly errorAddress: string = null;
     private readonly log: LoggerModule = null;
+    private readonly templateDir: string = `${__dirname}/../data/templates/`;
+    private readonly compileFromTemplateSource: (fileName: string) => HandlebarsTemplateDelegate
+        = o(handlebars.compile, x => fs.readFileSync(`${this.templateDir}/${x}`, 'utf8'));
+
+    private registerPartials(partials: string[]): void {
+        partials.forEach((partialName: string) => {
+            handlebars.registerPartial(partialName, fs.readFileSync(`${this.templateDir}/${partialName}.html`, 'utf8'));
+        });
+    }
+
+    private compileTemplates(templates: string[]): any {
+        const templateObj = {};
+        templates.forEach((template: string) => {
+            templateObj[template] = this.compileFromTemplateSource(`${template}.html`);
+        });
+        return templateObj;
+    }
+
+    private readonly compiledTemplates: any = {};
+
+    private readonly partials: string[] = [
+        'supportPartial',
+    ];
+
+    private readonly templates: string[] = [
+        'userVerification',
+        'errorReport',
+        'subscriberNotification',
+    ];
 
     private static INSTANCE: ProductionEmailer = null;
     public static getInstance(): ProductionEmailer {
@@ -61,6 +68,8 @@ class ProductionEmailer implements IEmailer {
 
         this.sparkPostClient = new SparkPost(config.getStringConfig('SPARKPOST_API_KEY'));
         this.errorAddress = config.getStringConfig('LOG_ADDR');
+        this.registerPartials(this.partials);
+        this.compiledTemplates = this.compileTemplates(this.templates);
     }
 
     public async errorAlert(message: string): Promise<void> {
@@ -68,7 +77,7 @@ class ProductionEmailer implements IEmailer {
             content: {
                 from: this.fromAddress,
                 subject: 'IGETBACK ERROR LOGGED',
-                html: templates.errorReport({
+                html: this.compiledTemplates.errorReport({
                     errorDate: new Date(),
                     errorMessage: message
                 })
@@ -98,7 +107,7 @@ class ProductionEmailer implements IEmailer {
                 content: {
                     from: this.fromAddress,
                     subject: 'IGetBack Notification',
-                    html: templates.subscriberNotification({
+                    html: this.compiledTemplates.subscriberNotification({
                         origin: origin,
                         destination: destination,
                         tripDate: getDateString(tripDate),
@@ -124,7 +133,7 @@ class ProductionEmailer implements IEmailer {
                 content: {
                     from: this.fromAddress,
                     subject: 'Verify Your IGetBack Account',
-                    html: templates.userVerification({
+                    html: this.compiledTemplates.userVerification({
                         firstName: firstName,
                         verifyLink: `${this.domainName}/${this.verifyEndpoint}/${recordId}`
                     }),
