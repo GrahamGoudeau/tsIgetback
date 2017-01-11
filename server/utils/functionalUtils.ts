@@ -24,14 +24,12 @@ export function defaults<T>(value: T, other: T): T {
 }
 
 export function maybeSequence<T>(arr: Maybe<T>[]): Maybe<T[]> {
-    const result: T[] = [];
+    const err: Error = new Error();
     try {
-        arr.forEach((x: Maybe<T>) => result.push(x.valueOrThrow(new Error())));
+        return Maybe.just<T[]>(arr.map((x: Maybe<T>) => x.valueOrThrow(err)));
     } catch (e) {
         return Maybe.nothing<T[]>();
     }
-
-    return Maybe.just<T[]>(result);
 }
 
 export function getDateString(date: Date): string {
