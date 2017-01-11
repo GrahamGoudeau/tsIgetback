@@ -30,7 +30,8 @@ export interface UserPasswordQuery extends OneUserQuery {
 }
 
 export interface FindTripsQuery {
-    tripIds: models.ObjectIdTs[]
+    tripIds: models.ObjectIdTs[],
+    ownerEmail: string
 }
 
 export interface CreateTripQuery {
@@ -126,12 +127,18 @@ export async function getUserFromEmailAndPassword(query: UserPasswordQuery): Pro
     return Either.right(user);
 }
 
-async function getTrips(query: FindTripsQuery, model: mongoose.Model<models.ITripModel>): Promise<models.ITrip[]> {
-    return await model.find({
+async function getTrips(query: FindTripsQuery, model: mongoose.Model<models.ITripModel>): Promise<DatabaseResult<models.ITripModel[]>> {
+    const result: models.ITripModel[] = await model.find({
         '_id': {
             '$in': query.tripIds
-        }
+        },
+        'ownerEmail': query.ownerEmail
     });
+
+    if (result == null) {
+        return Either.left(DatabaseErrorMessage.NOT_FOUND);
+    }
+    return Either.right(result);
 }
 
 async function createTrip(query: CreateTripQuery, model: mongoose.Model<models.ITripModel>): Promise<DatabaseResult<models.ITrip>> {
@@ -153,11 +160,11 @@ export async function createTripFromAirport(query: CreateTripQuery): Promise<Dat
     return createTrip(query, models.FromAirport);
 }
 
-export async function getTripsFromCampus(query: FindTripsQuery): Promise<models.ITrip[]> {
+export async function getTripsFromCampus(query: FindTripsQuery): Promise<DatabaseResult<models.ITripModel[]>> {
     return getTrips(query, models.FromCampus);
 }
 
-export async function getTripsFromAirport(query: FindTripsQuery): Promise<models.ITrip[]> {
+export async function getTripsFromAirport(query: FindTripsQuery): Promise<DatabaseResult<models.ITripModel[]>> {
     return getTrips(query, models.FromAirport);
 }
 
