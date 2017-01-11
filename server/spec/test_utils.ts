@@ -32,7 +32,7 @@ export async function createUser(userPassword: string): Promise<models.IUser> {
     const emailName = makeString(16);
     const userEmail = `${emailName}@testDomain.com`;
     const newUserResponse: IGetBackResponse = await WebRequest.json<IGetBackResponse>(
-        makeEndpoint('user/create'),
+        makeEndpoint('user'),
         {
             method: 'POST',
             json: true,
@@ -60,7 +60,7 @@ export async function login(email: string, password: string): Promise<AuthToken>
             });
         return loginResponse.data.authToken;
     } catch (e) {
-        throw new Error('could not log in');
+        throw new Error('could not log in - make sure that email is disabled?');
     }
 }
 

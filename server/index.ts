@@ -47,11 +47,11 @@ mongoose.connect(dbUrl);
 const routeManager = new RouteManager(app);
 
 // route builders
-const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user/create', user.handleCreateUser)
+const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user', user.handleCreateUser)
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
 
-const userDeleteBuilder: SecureRouteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/delete', user.handleDelete)
+const userDeleteBuilder: SecureRouteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user', user.handleDelete)
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.DELETE);
 
@@ -75,17 +75,29 @@ const fromAirportJoinBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
 
-const fromCampusDeleteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/delete/:tripId', (req, res, token) => {
+const fromCampusDeleteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/:tripId', (req, res, token) => {
     trips.handleDeleteTrip(req, res, token, db.AddToCampusOrAirport.FROM_CAMPUS);
 })
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.DELETE);
 
-const fromAirportDeleteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/delete/:tripId', (req, res, token) => {
+const fromAirportDeleteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/:tripId', (req, res, token) => {
     trips.handleDeleteTrip(req, res, token, db.AddToCampusOrAirport.FROM_AIRPORT);
 })
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.DELETE);
+
+const fromCampusGetBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/getMultiple', (req, res, token) => {
+    trips.handleGetMultipleTrips(req, res, token, db.AddToCampusOrAirport.FROM_CAMPUS);
+})
+    .setIsAjax(true)
+    .setHttpMethod(HttpMethod.POST);
+
+const fromAirportGetBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromAirport/getMultiple', (req, res, token) => {
+    trips.handleGetMultipleTrips(req, res, token, db.AddToCampusOrAirport.FROM_AIRPORT);
+})
+    .setIsAjax(true)
+    .setHttpMethod(HttpMethod.POST);
 
 const fromCampusSearchBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/fromCampus/search', (req, res, token) => {
     trips.handleSearch(req, res, token, db.AddToCampusOrAirport.FROM_CAMPUS);
@@ -155,6 +167,8 @@ const fromCampusJoinRoute: SecureRoute = new SecureRoute(fromCampusJoinBuilder);
 const fromAirportJoinRoute: SecureRoute = new SecureRoute(fromAirportJoinBuilder);
 const fromCampusDeleteRoute: SecureRoute = new SecureRoute(fromCampusDeleteBuilder);
 const fromAirportDeleteRoute: SecureRoute = new SecureRoute(fromAirportDeleteBuilder);
+const fromCampusGetRoute: SecureRoute = new SecureRoute(fromCampusGetBuilder);
+const fromAirportGetRoute: SecureRoute = new SecureRoute(fromAirportGetBuilder);
 const fromCampusSearchRoute: SecureRoute = new SecureRoute(fromCampusSearchBuilder);
 const fromAirportSearchRoute: SecureRoute = new SecureRoute(fromAirportSearchBuilder);
 const fromCampusSubscribeRoute: SecureRoute = new SecureRoute(fromCampusSubscribeBuilder);
@@ -183,6 +197,8 @@ const secureRoutes = [
     fromAirportJoinRoute,
     fromCampusDeleteRoute,
     fromAirportDeleteRoute,
+    fromCampusGetRoute,
+    fromAirportGetRoute,
     fromCampusSearchRoute,
     fromAirportSearchRoute,
     fromCampusSubscribeRoute,

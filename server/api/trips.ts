@@ -7,9 +7,10 @@ import { Validator } from "validator.ts/Validator";
 import { LoggerModule } from './logger';
 import { DestinationContext } from '../destinationContext';
 import { IGetBackConfig } from '../config';
-import { Either } from 'tsmonad';
+import { Either, Maybe } from 'tsmonad';
 import { getEmailerInstance, IEmailer } from './emailer';
 import { Set } from 'immutable';
+import { maybeSequence } from '../utils/functionalUtils';
 
 const log = new LoggerModule('trips');
 const config = IGetBackConfig.getInstance();
@@ -193,38 +194,83 @@ export async function handleSearch(req: express.Request,
     });
 }
 
-export async function handleDeleteTrip(req: express.Request,
-                                res: express.Response,
-                                authToken: AuthToken,
-                                tripType: db.AddToCampusOrAirport
-                               ): Promise<void> {
+function convertToObjectId(id: string): Maybe<ObjectIdTs> {
+    if (!id) {
+        return Maybe.nothing<ObjectIdTs>();
+    }
     let tripId: ObjectIdTs;
     try {
-        tripId = mongoose.Types.ObjectId(req.params.tripId);
+        tripId = mongoose.Types.ObjectId(id);
     } catch (e) {
-        log.DEBUG('failed to convert to mongo object ID', req.params.tripId);
-        badRequest(res, 'bad trip ID');
-        return;
+        log.DEBUG('failed to convert to mongo object id', id);
+        return Maybe.nothing<ObjectIdTs>();
+    }
+    return Maybe.just<ObjectIdTs>(tripId);
+}
+
+export async function handleGetMultipleTrips(req: express.Request,
+                                             res: express.Response,
+                                             authToken: AuthToken,
+                                             tripType: db.AddToCampusOrAirport
+                                            ): Promise<void> {
+    if (!req.body.tripIds) {
+        badRequest(res, 'missing trip ids');
     }
 
-    try {
-        const successResult: DatabaseResult<boolean> = await db.deleteTrip(tripId, authToken.email, tripType);
-        successResult.caseOf({
-            left: e => {
-                badRequest(res, 'could not delete trip');
-            },
-            right: success => {
-                if (!success) {
-                    internalError(res, 'could not delete trip');
-                } else {
-                    successResponse(res);
-                }
+    const idStrings: string[] = req.body.tripIds;
+    const tripIdResults: Maybe<ObjectIdTs>[] = idStrings.map(convertToObjectId);
+    const tripIds: Maybe<ObjectIdTs[]> = maybeSequence(tripIdResults);
+    tripIds.caseOf({
+        just: async (ids: ObjectIdTs[]) => {
+            const query: db.FindTripsQuery = {
+                tripIds: ids,
+                ownerEmail: authToken.email
+            };
+            let results: DatabaseResult<models.ITripModel[]>;
+            if (tripType === db.AddToCampusOrAirport.FROM_CAMPUS) {
+                results = await db.getTripsFromCampus(query);
+            } else {
+                results = await db.getTripsFromAirport(query);
             }
-        });
-    } catch (e) {
-        log.ERROR('failed to delete trip', tripType, e.message);
-        internalError(res, 'exception while deleting trip');
-    }
+
+            jsonResponse(res, results);
+        },
+        nothing: async () => badRequest(res, 'bad trip id')
+    });
+}
+
+export async function handleDeleteTrip(req: express.Request,
+                                       res: express.Response,
+                                       authToken: AuthToken,
+                                       tripType: db.AddToCampusOrAirport
+                                      ): Promise<void> {
+    const tripIdResult: Maybe<ObjectIdTs> = convertToObjectId(req.params.tripId);
+    tripIdResult.caseOf({
+        nothing: async () => {
+            log.DEBUG('failed to convert to mongo object ID', req.params.tripId);
+            badRequest(res, 'bad trip id');
+        },
+        just: async (tripId: ObjectIdTs) => {
+            try {
+                const successResult: DatabaseResult<boolean> = await db.deleteTrip(tripId, authToken.email, tripType);
+                successResult.caseOf({
+                    left: e => {
+                        badRequest(res, 'could not delete trip');
+                    },
+                    right: success => {
+                        if (!success) {
+                            internalError(res, 'could not delete trip');
+                        } else {
+                            successResponse(res);
+                        }
+                    }
+                });
+            } catch (e) {
+                log.ERROR('failed to delete trip', tripType, e.message);
+                internalError(res, 'exception while deleting trip');
+            }
+        }
+    });
 }
 
 async function handleJoinTrip(req: express.Request,

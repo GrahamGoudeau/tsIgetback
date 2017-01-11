@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as Immutable from 'immutable';
+import { Maybe } from 'tsmonad';
 
 export function o<A, B, C>(f: (y: B) => C,
                            g: (x: A) => B): (z: A) => C {
@@ -20,6 +21,15 @@ export function defaults<T>(value: T, other: T): T {
         return other;
     }
     return value;
+}
+
+export function maybeSequence<T>(arr: Maybe<T>[]): Maybe<T[]> {
+    const err: Error = new Error();
+    try {
+        return Maybe.just<T[]>(arr.map((x: Maybe<T>) => x.valueOrThrow(err)));
+    } catch (e) {
+        return Maybe.nothing<T[]>();
+    }
 }
 
 export function getDateString(date: Date): string {
