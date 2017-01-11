@@ -10,9 +10,11 @@ export interface IEmailer {
     userVerification: (firstName: string, email: string, recordId: string) => Promise<boolean>;
     errorAlert: (message: string) => Promise<void>;
     subscriberNotification: (recipients: string[], origin: string, destination: string, tripDate: Date, tripHour: number, tripQuarterHour: number, contactEmail: string) => Promise<void>
+    isSendActive: () => boolean;
 }
 
 class ProductionEmailer implements IEmailer {
+    private readonly isProduction: boolean = true;
     private readonly fromAddress: string = null;
     private readonly domainName: string = null;
     private readonly verifyEndpoint: string = null;
@@ -23,6 +25,10 @@ class ProductionEmailer implements IEmailer {
     private readonly templateDir: string = `${__dirname}/../data/templates/`;
     private readonly compileFromTemplateSource: (fileName: string) => HandlebarsTemplateDelegate
         = o(handlebars.compile, x => fs.readFileSync(`${this.templateDir}/${x}`, 'utf8'));
+
+    public isSendActive(): boolean {
+        return this.isProduction;
+    }
 
     private registerPartials(partials: string[]): void {
         partials.forEach((partialName: string) => {
@@ -60,7 +66,6 @@ class ProductionEmailer implements IEmailer {
 
     private constructor() {
         this.log = new LoggerModule('production-emailer');
-        this.log.INFO('Using production emailer');
         const config = IGetBackConfig.getInstance();
         this.fromAddress = config.getStringConfig('MAIL_ADDR');
         this.domainName = config.getStringConfig('DOMAIN_NAME');
@@ -163,7 +168,10 @@ class DisabledEmailer implements IEmailer {
 
     private constructor() {
         this.log = new LoggerModule('disabled-emailer');
-        this.log.INFO('Using disabled emailer');
+    }
+
+    public isSendActive(): boolean {
+        return false;
     }
 
     public async userVerification(firstName: string, email: string, recordId: string): Promise<boolean> {
