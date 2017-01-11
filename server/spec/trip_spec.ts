@@ -91,14 +91,14 @@ describe('The trip endpoints', () => {
 
         expect(userFromCampusBeforeDelete.ownedTripsFromCampus.indexOf(resFromCampus.data._id)).not.toBe(-1);
         const delResCampus = await WebRequest.json<IGetBackResponse>(
-            makeEndpoint(`fromCampus/delete/${resFromCampus.data._id}`),
+            makeEndpoint(`fromCampus/${resFromCampus.data._id}`),
             Object.assign({}, {
                 method: 'DELETE'
             }, reqOpts1)
         );
         const resFromAirport = await createValidTrip('fromAirport', reqOpts1);
         const delResAirport = await WebRequest.json<IGetBackResponse>(
-            makeEndpoint(`fromAirport/delete/${resFromAirport.data._id}`),
+            makeEndpoint(`fromAirport/${resFromAirport.data._id}`),
             Object.assign({}, {
                 method: 'DELETE'
             }, reqOpts1)
@@ -120,13 +120,9 @@ describe('The trip endpoints', () => {
 
         try {
             const delRes = await WebRequest.json<IGetBackResponse>(
-                makeEndpoint('fromCampus/delete'),
+                makeEndpoint(`fromCampus/${res.data._id}`),
                 Object.assign({}, {
-                    method: 'DELETE',
-                    json: true,
-                    body: {
-                        tripId: res.data._id
-                    }
+                    method: 'DELETE'
                 }, reqOpts2)
             );
             expect(delRes).not.toBeUndefined();

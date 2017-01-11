@@ -24,7 +24,7 @@ describe('A user', () => {
 
     it('can reject invalid creation requests', async (done) => {
         const newUserResponse: IGetBackResponse = await WebRequest.json<IGetBackResponse>(
-            test_utils.makeEndpoint('user/create'),
+            test_utils.makeEndpoint('user'),
             {
                 method: 'POST',
                 json: true,
@@ -53,7 +53,7 @@ describe('A user', () => {
 
     it('can be created', async (done) => {
         const newUserResponse: IGetBackResponse = await WebRequest.json<IGetBackResponse>(
-            test_utils.makeEndpoint('user/create'),
+            test_utils.makeEndpoint('user'),
             {
                 method: 'POST',
                 json: true,
