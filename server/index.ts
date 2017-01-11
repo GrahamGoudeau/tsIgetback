@@ -47,11 +47,11 @@ mongoose.connect(dbUrl);
 const routeManager = new RouteManager(app);
 
 // route builders
-const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user/create', user.handleCreateUser)
+const userCreateBuilder: InsecureRouteBuilder = <InsecureRouteBuilder>new InsecureRouteBuilder('/api/user', user.handleCreateUser)
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.POST);
 
-const userDeleteBuilder: SecureRouteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user/delete', user.handleDelete)
+const userDeleteBuilder: SecureRouteBuilder = <SecureRouteBuilder>new SecureRouteBuilder('/api/user', user.handleDelete)
     .setIsAjax(true)
     .setHttpMethod(HttpMethod.DELETE);
 
