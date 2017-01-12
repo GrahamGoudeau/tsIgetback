@@ -9,12 +9,17 @@ import * as db from './api/db';
 import * as path from 'path';
 import { LoggerModule } from './api/logger';
 import { IGetBackConfig } from './config';
+import { IEmailer, getEmailerInstance } from './api/emailer';
 
-const log = new LoggerModule('index');
+const log: LoggerModule = new LoggerModule('index');
 const app: express.Express = express();
-const config = IGetBackConfig.getInstance();
-const verifyEndpoint = config.getStringConfig('VERIFY_ENDPOINT');
-const isProduction = config.getBooleanConfigDefault('PRODUCTION', false);
+const config: IGetBackConfig = IGetBackConfig.getInstance();
+const verifyEndpoint: string = config.getStringConfig('VERIFY_ENDPOINT');
+const isProduction: boolean = config.getBooleanConfigDefault('PRODUCTION', false);
+
+// ensure all the email templates and partials are compiled
+const emailer: IEmailer = getEmailerInstance();
+log.INFO(`Using ${emailer.isSendActive() ? 'production' : 'disabled'} emailer`);
 
 // app configuration must appear before routes are set
 app.use(bodyParser.urlencoded({extended: true}));
