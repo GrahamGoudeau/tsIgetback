@@ -1,8 +1,8 @@
-import * as React from "react";
-import { Button } from "react-bootstrap";
+import * as React from 'react';
+import { Button } from 'react-bootstrap';
 import { ApplicationState } from '../index';
-import { goToUrl } from '../utils';
-import { AuthState } from '../../utils/signInState';
+import { goToUrl } from '../utils/onClickUtils';
+import { AuthState } from '../utils/authState';
 
 export class SignIn extends React.Component<{}, {}> {
     constructor(props: any) {

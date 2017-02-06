@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AuthState } from '../../utils/signInState';
+import { AuthState } from '../utils/authState';
 import { browserHistory } from 'react-router';
 
 export abstract class SecureComponent<P, S> extends React.Component<P, S> {
