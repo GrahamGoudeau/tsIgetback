@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { AuthState } from '../utils/authState';
+import { Maybe } from 'tsmonad';
+
+import { UserInfo, AuthState } from '../utils/authState';
 import { browserHistory } from 'react-router';
 
 export abstract class SecureComponent<P, S> extends React.Component<P, S> {
@@ -9,10 +11,11 @@ export abstract class SecureComponent<P, S> extends React.Component<P, S> {
 
     componentWillMount() {
         const authState: AuthState = AuthState.getInstance();
-        authState.getState().then((state: boolean) => {
-            if (!state) {
-                browserHistory.push('/login');
-            }
+        authState.getState().then((state: Maybe<UserInfo>) => {
+            state.caseOf({
+                nothing: () => browserHistory.push('/login'),
+                just: u => { return; }
+            });
         });
     }
 }

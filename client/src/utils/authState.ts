@@ -1,10 +1,19 @@
 import { Maybe } from 'tsmonad';
 
-export type AuthCallback = (value: boolean) => void;
+export type AuthCallback = (state: Maybe<UserInfo>) => void;
+
+export interface UserInfo {
+    firstName: string;
+    lastName: string;
+    email: string;
+}
 
 export class AuthState {
     private signedIn: Maybe<boolean> = Maybe.nothing<boolean>();
+    private authState: Maybe<Maybe<UserInfo>> = Maybe.nothing<Maybe<UserInfo>>();
     private subscribers: AuthCallback[] = [];
+    private userInfo: UserInfo = null;
+    private readonly ACCOUNT_ENDPOINT: string = '/api/user/account';
     private static INSTANCE: AuthState = null;
     private constructor() {
     }
@@ -20,31 +29,40 @@ export class AuthState {
         this.subscribers.push(c);
     }
 
-    public setState(value: boolean): void {
-        this.signedIn = Maybe.just<boolean>(value);
-        this.subscribers.forEach((c: AuthCallback) => c(value));
+    private broadcast(newState: Maybe<UserInfo>): void {
+        this.subscribers.forEach((c: AuthCallback) => c(newState));
     }
 
-    public async getState(): Promise<boolean> {
-        const signedInState: boolean = await this.signedIn.caseOf({
-            just: async (b: boolean) => b,
+    public authorize(user: UserInfo): void {
+        const newState: Maybe<UserInfo> = Maybe.just(user);
+        this.authState = Maybe.just<Maybe<UserInfo>>(newState);
+        this.broadcast(newState);
+    }
+
+    public deauthorize(): void {
+        const newState: Maybe<UserInfo> = Maybe.nothing<UserInfo>();
+        this.authState = Maybe.just<Maybe<UserInfo>>(newState);
+        this.broadcast(newState);
+    }
+
+    public async getState(): Promise<Maybe<UserInfo>> {
+        return await this.authState.caseOf({
+            just: async (userOpt: Maybe<UserInfo>) => userOpt,
             nothing: async () => {
-                let result: boolean;
+                let result: Maybe<UserInfo> = Maybe.nothing<UserInfo>();
                 try {
                     const res = await $.ajax({
-                        url: 'http://localhost:5000/api/user',
+                        url: this.ACCOUNT_ENDPOINT,
                         method: 'post',
                         dataType: 'json'
                     });
-                    result = res.test == null;
+                    this.authorize(res.data);
+                    result = Maybe.just<UserInfo>(res.data);
                 } catch (e) {
-                    result = false;
+                    this.deauthorize();
                 }
-                this.setState(result);
                 return result;
             }
         });
-
-        return signedInState;
     }
 }

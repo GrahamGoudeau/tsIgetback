@@ -11,9 +11,14 @@ export class SignIn extends React.Component<{}, {}> {
 
     async handleClick(event: any) {
         const authState: AuthState = AuthState.getInstance();
-        const state: boolean = await authState.getState();
-
-        authState.setState(!state);
+        (await authState.getState()).caseOf({
+            just: u => authState.deauthorize(),
+            nothing: () => authState.authorize({
+                firstName: 'g',
+                lastName: 'gouda',
+                email: 'email'
+            })
+        });
         goToUrl('/', event);
     }
 

@@ -19,7 +19,7 @@ export class MyNav extends React.Component<ApplicationState, {}> {
 
     signOut() {
         const authState: AuthState = AuthState.getInstance();
-        authState.setState(false);
+        authState.deauthorize();
         browserHistory.push('/');
     }
 
@@ -39,6 +39,7 @@ export class MyNav extends React.Component<ApplicationState, {}> {
                         <NavItem eventKey={2} href=''>Airport → Campus</NavItem>
                     </Nav>
                     <Nav pullRight>
+                        <NavItem className={this.showOrHide(this.props.signedIn)} eventKey={3} href='' onClick={goToUrl('/account')}>Account</NavItem>
                         <NavItem className={this.showOrHide(this.props.signedIn)} eventKey={3} href='' onClick={this.signOut}>Sign Out</NavItem>
                         <NavItem className={this.showOrHide(!this.props.signedIn)} eventKey={4} href='' onClick={goToUrl('/register')}>Register</NavItem>
                         <NavItem className={this.showOrHide(!this.props.signedIn)} eventKey={5} href='' onClick={goToUrl('/signIn')}>Sign In</NavItem>

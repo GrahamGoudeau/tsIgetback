@@ -1,13 +1,14 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Router, Route, Link, browserHistory, IndexRoute, Redirect } from 'react-router'
+import { Maybe } from 'tsmonad';
 
 import { Hello } from './components/Hello';
 import { About } from './components/About';
 import { Unknown } from './components/Unknown';
 import { MyNav } from './components/Navbar';
 import { SignIn } from './components/SignIn';
-import { AuthState, AuthCallback } from './utils/authState';
+import { UserInfo, AuthState, AuthCallback } from './utils/authState';
 import { Account } from './components/Account';
 
 export interface ApplicationState {
@@ -18,9 +19,12 @@ class App extends React.Component<{}, ApplicationState> {
     constructor(props: any) {
         super(props);
         const authState: AuthState = AuthState.getInstance();
-        const updateAuthState: AuthCallback = (state: boolean) => {
+        const updateAuthState: AuthCallback = (state: Maybe<UserInfo>) => {
             this.setState({
-                signedIn: state
+                signedIn: state.caseOf({
+                        nothing: () => false,
+                        just: u => true
+                    })
             });
         };
         this.state = {
