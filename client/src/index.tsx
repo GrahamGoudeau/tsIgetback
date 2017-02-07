@@ -11,7 +11,6 @@ import { SignIn } from './components/SignIn';
 import { UserInfo, AuthState, AuthCallback } from './utils/authState';
 import { Account } from './components/Account';
 import { Register } from './components/Register';
-import { Login } from './components/Login';
 
 export interface ApplicationState {
     signedIn: boolean
@@ -63,7 +62,6 @@ class Root extends React.Component<{}, ApplicationState> {
                         <Route path='signIn' component={SignIn}/>
                         <Route path='account' component={Account}/>
                         <Route path='register' component={Register}/>
-                        <Route path='login' component={Login}/>
                         <Route path='*' component={Unknown}/>
                     </Route>
                 </Router>

@@ -6,24 +6,26 @@ export interface UserInfo {
     firstName: string;
     lastName: string;
     email: string;
+    authToken: string;
 }
 
 export class AuthState {
     private signedIn: Maybe<boolean> = Maybe.nothing<boolean>();
     private authState: Maybe<Maybe<UserInfo>> = Maybe.nothing<Maybe<UserInfo>>();
     private subscribers: AuthCallback[] = [];
-    private userInfo: UserInfo = null;
     private readonly ACCOUNT_ENDPOINT: string = '/api/user/account';
-    private static INSTANCE: AuthState = null;
-    private constructor() {
-    }
 
+    private static INSTANCE: AuthState = null;
     static getInstance(): AuthState {
         if (AuthState.INSTANCE == null) {
             AuthState.INSTANCE = new AuthState();
         }
         return AuthState.INSTANCE;
     }
+
+    private constructor() {
+    }
+
 
     public subscribe(c: AuthCallback): void {
         this.subscribers.push(c);
