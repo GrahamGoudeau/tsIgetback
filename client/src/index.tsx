@@ -10,6 +10,8 @@ import { MyNav } from './components/Navbar';
 import { SignIn } from './components/SignIn';
 import { UserInfo, AuthState, AuthCallback } from './utils/authState';
 import { Account } from './components/Account';
+import { Register } from './components/Register';
+import { Login } from './components/Login';
 
 export interface ApplicationState {
     signedIn: boolean
@@ -38,12 +40,13 @@ class App extends React.Component<{}, ApplicationState> {
     render() {
         return (
             <div>
-            <MyNav signedIn={this.state.signedIn}/>
-            {this.props.children}
+                <MyNav signedIn={this.state.signedIn}/>
+                {this.props.children}
             </div>
         )
     }
 };
+
 class Root extends React.Component<{}, ApplicationState> {
     constructor() {
         super();
@@ -59,6 +62,8 @@ class Root extends React.Component<{}, ApplicationState> {
                         <Route path='hello' component={Hello}/>
                         <Route path='signIn' component={SignIn}/>
                         <Route path='account' component={Account}/>
+                        <Route path='register' component={Register}/>
+                        <Route path='login' component={Login}/>
                         <Route path='*' component={Unknown}/>
                     </Route>
                 </Router>
