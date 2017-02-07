@@ -1,8 +1,31 @@
 import * as React from 'react';
+import { updateState } from '../utils/onClickUtils';
+
+export interface ErrorState<S> {
+    field: keyof S;
+    condition: (state: S) => boolean;
+}
 
 export abstract class FormComponent<P, S> extends React.Component<P, S> {
     constructor(props: P) {
         super(props);
+    }
+
+    errorCheck(originalState: S, errorStates: ErrorState<S>[]): boolean {
+        let error = false;
+        const newState: S = Object.assign({},
+            originalState,
+            errorStates.reduce((stateAcc: S, e: ErrorState<S>) => {
+                const currResult: boolean = e.condition(stateAcc);
+                error = error || currResult;
+
+                // must convert currResult to any- breaks typechecking
+                return updateState(stateAcc, e.field, currResult as any);
+            }, originalState)
+        );
+
+        this.setState(newState);
+        return error;
     }
 
     // listen for ENTER key and call this.handleSubmit with the event

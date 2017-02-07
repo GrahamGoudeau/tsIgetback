@@ -46,24 +46,6 @@ export class Register extends FormComponent<{}, InputState> {
         condition: (state: InputState) => state.password !== state.passwordConfirm
     }];
 
-    // true if fails, false if passes
-    // updates the state with error conditions
-    errorCheck(originalState: InputState, errorStates: ErrorState<keyof InputState>[]): boolean {
-        let error: boolean = false;
-
-        const newState: InputState = Object.assign({},
-            originalState,
-            errorStates.reduce((stateAcc: InputState, e: ErrorState<keyof InputState>) => {
-                const currResult: boolean = e.condition(stateAcc);
-                error = error || currResult;
-                return updateState(stateAcc, e.field, currResult);
-            }, originalState)
-        );
-
-        this.setState(newState);
-        return error;
-    }
-
     async handleSubmit(event: Event) {
         event.preventDefault();
         if (this.errorCheck(this.state, this.errorStates)) {

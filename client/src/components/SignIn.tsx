@@ -4,10 +4,18 @@ import { ApplicationState } from '../index';
 import { goToUrl } from '../utils/onClickUtils';
 import { AuthState } from '../utils/authState';
 import { FormComponent } from './Form';
+import { ErrorComponent } from './Error';
 
 interface SignInState {
     email: string;
     password: string;
+    emailFormat: boolean;
+    passwordLength: boolean;
+}
+
+interface ErrorState {
+    field: keyof SignInState;
+    condition: (state: SignInState) => boolean;
 }
 
 export class SignIn extends FormComponent<{}, SignInState> {
@@ -15,9 +23,19 @@ export class SignIn extends FormComponent<{}, SignInState> {
         super(props);
         this.state = {
             email: '',
-            password: ''
+            password: '',
+            emailFormat: false,
+            passwordLength: false
         };
     }
+
+    private readonly errorStates: ErrorState[] = [{
+        field: 'emailFormat',
+        condition: (state: SignInState) => state.email.indexOf('@') === -1
+    }, {
+        field: 'passwordLength',
+        condition: (state: SignInState) => state.password.length < 6
+    }];
 
     async handleClick(event: any) {
         const authState: AuthState = AuthState.getInstance();
@@ -34,7 +52,10 @@ export class SignIn extends FormComponent<{}, SignInState> {
     }
 
     async handleSubmit(event: Event) {
-        console.log('submit');
+        if (this.errorCheck(this.state, this.errorStates)) {
+            return;
+        }
+        console.log('success');
     }
 
     render() {
@@ -45,6 +66,7 @@ export class SignIn extends FormComponent<{}, SignInState> {
                         <label>
                             Email:
                             <input id="email" type="email" value={this.state.email} onChange={this.handleChange.bind(this)}/>
+                            <ErrorComponent doShow={this.state.emailFormat} message='Please enter a valid email address'/>
                         </label>
                     </div>
 
@@ -52,6 +74,7 @@ export class SignIn extends FormComponent<{}, SignInState> {
                         <label>
                             Password:
                             <input id="password" type="password" value={this.state.password} onChange={this.handleChange.bind(this)}/>
+                            <ErrorComponent doShow={this.state.passwordLength} message='Password not long enough!'/>
                         </label>
                     </div>
 
