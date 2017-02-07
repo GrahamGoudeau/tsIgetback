@@ -4,6 +4,7 @@ import { AuthState } from '../utils/authState';
 import { showOrHide, updateState } from '../utils/onClickUtils';
 
 import { ErrorComponent } from './Error';
+import { FormComponent } from './Form';
 
 interface InputState {
     firstName: string;
@@ -11,13 +12,19 @@ interface InputState {
     email: string;
     password: string;
     passwordConfirm: string;
-    passwordError: boolean;
+    passwordLength: boolean;
+    passwordMatch: boolean;
     emailError: boolean;
 }
 
-export class Register extends React.Component<{}, InputState> {
+interface ErrorState<K extends keyof InputState> {
+    field: K;
+    condition: (state: InputState) => boolean; // true indicates error happened
+}
+
+export class Register extends FormComponent<{}, InputState> {
     private readonly SUBMIT_ENDPOINT: string = 'api/user';
-    constructor(props: InputState) {
+    constructor(props: {}) {
         super(props);
         this.state = {
             firstName: '',
@@ -25,16 +32,44 @@ export class Register extends React.Component<{}, InputState> {
             email: '',
             password: '',
             passwordConfirm: '',
-            passwordError: false,
+            passwordLength: false,
+            passwordMatch: false,
             emailError: false
         };
     }
 
+    private readonly errorStates: ErrorState<keyof InputState>[] = [{
+        field: 'passwordLength',
+        condition: (state: InputState) => state.password.length < 6
+    }, {
+        field: 'passwordMatch',
+        condition: (state: InputState) => state.password !== state.passwordConfirm
+    }];
+
+    // true if fails, false if passes
+    // updates the state with error conditions
+    errorCheck(originalState: InputState, errorStates: ErrorState<keyof InputState>[]): boolean {
+        let error: boolean = false;
+
+        const newState: InputState = Object.assign({},
+            originalState,
+            errorStates.reduce((stateAcc: InputState, e: ErrorState<keyof InputState>) => {
+                const currResult: boolean = e.condition(stateAcc);
+                error = error || currResult;
+                return updateState(stateAcc, e.field, currResult);
+            }, originalState)
+        );
+
+        this.setState(newState);
+        return error;
+    }
+
     async handleSubmit(event: Event) {
-        if (this.state.password.length < 6) {
-            this.setState(updateState(this.state, 'passwordError', true));
+        event.preventDefault();
+        if (this.errorCheck(this.state, this.errorStates)) {
             return;
         }
+
         try {
             const response = await $.ajax({
                 url: this.SUBMIT_ENDPOINT,
@@ -47,35 +82,15 @@ export class Register extends React.Component<{}, InputState> {
                     password: this.state.password
                 }
             });
-            const authState: AuthState = AuthState.getInstance();
-            authState.authorize({
-                firstName: this.state.firstName,
-                lastName: this.state.lastName,
-                email: this.state.email
-            });
-            browserHistory.push('/');
+            browserHistory.push('/signIn');
         } catch (e) {
             console.log('err', e);
         }
-        event.preventDefault();
-    }
-
-    handleChange(event: Event) {
-        event.preventDefault();
-        const newStateField: any = {};
-        const id: string = (event.target as HTMLElement).id as string;
-        const value: string = (event.target as HTMLInputElement).value as string;
-        this.setState(Object.assign({},
-            this.state,
-            {
-                [id]: value
-            }
-        ));
     }
 
     render() {
         return (
-            <form onSubmit={this.handleSubmit.bind(this)}>
+            <form onKeyUp={this.handleKeyUp.bind(this)} onSubmit={this.handleSubmit.bind(this)}>
                 <div>
                     <label>
                         First Name:
@@ -98,13 +113,14 @@ export class Register extends React.Component<{}, InputState> {
                     <label>
                         Password:
                         <input id="password" type="password" value={this.state.password} onChange={this.handleChange.bind(this)}/>
-                        <ErrorComponent doShow={this.state.passwordError} message='Password not long enough!'/>
+                        <ErrorComponent doShow={this.state.passwordLength} message='Password not long enough!'/>
                     </label>
                 </div>
                 <div>
                     <label>
                         Confirm password:
                         <input id="passwordConfirm" type="password" value={this.state.passwordConfirm} onChange={this.handleChange.bind(this)}/>
+                        <ErrorComponent doShow={this.state.passwordMatch} message='Passwords do not match!'/>
                     </label>
                 </div>
                 <input type="button" onClick={this.handleSubmit.bind(this)}/>
