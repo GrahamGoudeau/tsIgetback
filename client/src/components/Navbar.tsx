@@ -27,8 +27,8 @@ export class MyNav extends React.Component<ApplicationState, {}> {
                 </Navbar.Header>
                 <Navbar.Collapse>
                     <Nav>
-                        <NavItem eventKey={1} href='' onClick={goToUrl('/t')}>Campus → Airport</NavItem>
-                        <NavItem eventKey={2} href=''>Airport → Campus</NavItem>
+                        <NavItem className={showOrHide(this.props.signedIn)} eventKey={1} href='' onClick={goToUrl('/t')}>Campus → Airport</NavItem>
+                        <NavItem className={showOrHide(this.props.signedIn)} eventKey={2} href=''>Airport → Campus</NavItem>
                     </Nav>
                     <Nav pullRight>
                         <NavItem className={showOrHide(this.props.signedIn)} eventKey={3} href='' onClick={goToUrl('/account')}>Account</NavItem>
