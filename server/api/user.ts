@@ -92,7 +92,8 @@ export async function handleLogin(req: express.Request, res: express.Response): 
                     if (user.verified) {
                         await db.recordLogin({email: user.email});
                         jsonResponse(res, {
-                            authToken: security.buildAuthToken(user.email)
+                            authToken: security.buildAuthToken(user.email),
+                            user: user
                         });
                     } else {
                         badRequest(res, 'user not verified');
