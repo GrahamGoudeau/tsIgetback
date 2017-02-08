@@ -1,8 +1,9 @@
 import * as React from 'react';
+import { browserHistory } from 'react-router';
 import { Button } from 'react-bootstrap';
 import { ApplicationState } from '../index';
 import { goToUrl } from '../utils/onClickUtils';
-import { AuthState } from '../utils/authState';
+import { UserInfo, AuthState } from '../utils/authState';
 import { FormComponent } from './Form';
 import { ErrorComponent } from './Error';
 
@@ -19,6 +20,7 @@ interface ErrorState {
 }
 
 export class SignIn extends FormComponent<{}, SignInState> {
+    private readonly SIGN_IN_ENDPOINT: string = 'api/user/login';
     constructor(props: any) {
         super(props);
         this.state = {
@@ -55,7 +57,31 @@ export class SignIn extends FormComponent<{}, SignInState> {
         if (this.errorCheck(this.state, this.errorStates)) {
             return;
         }
-        console.log('success');
+        try {
+            const response = await $.ajax({
+                url: this.SIGN_IN_ENDPOINT,
+                method: 'post',
+                dataType: 'json',
+                data: {
+                    email: this.state.email,
+                    password: this.state.password
+                }
+            });
+            const data: any = response.data;
+            console.log('data:', data);
+            const userInfo: UserInfo = {
+                firstName: data.user.firstName,
+                lastName: data.user.lastName,
+                email: this.state.email,
+                authToken: data.authToken
+            };
+            const authState: AuthState = AuthState.getInstance();
+            authState.authorize(userInfo);
+            browserHistory.push('/');
+            console.log(response);
+        } catch (e) {
+            console.log('fail', e);
+        }
     }
 
     render() {
@@ -78,7 +104,7 @@ export class SignIn extends FormComponent<{}, SignInState> {
                         </label>
                     </div>
 
-                    <input type="button" onChange={this.handleSubmit.bind(this)}/>
+                    <input type="button" value='Sign In' onChange={this.handleSubmit.bind(this)}/>
                 </form>
             </div>
         );
