@@ -74,6 +74,10 @@ export function parseCookie(cookie: string): Maybe<AuthToken> {
 
     // attempt to get the latest cookie added to the session- not great
     const token = allMatches[allMatches.length - 1];
+    if (!token) {
+        return fail;
+    }
+
     try {
         const deserializedResult: any = JSON.parse(decrypt(token));
         if (!deserializedResult.email || !deserializedResult.authorizedAt) {
@@ -87,7 +91,7 @@ export function parseCookie(cookie: string): Maybe<AuthToken> {
         return Maybe.just(result);
     } catch (e) {
         log.ERROR('JSON exception parsing cookie:', e.message);
-        log.ERROR('JSON:', decrypt(token));
+        log.ERROR('token:', token, 'cookie:', cookie);
     }
 
     return fail;
