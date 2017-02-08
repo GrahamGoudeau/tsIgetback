@@ -34,7 +34,8 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
 
                     // if the email failed (e.g. hit our limit), manually verify
                     if (!emailSendSuccess) {
-                        await db.verifyUser({email: newUser.email});
+                        badRequest(res, 'could not send email');
+                        return;
                     }
                     jsonResponse(res, {
                         newUser: newUser,
