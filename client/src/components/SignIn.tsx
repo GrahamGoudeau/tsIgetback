@@ -4,7 +4,7 @@ import { Button } from 'react-bootstrap';
 import { ApplicationState } from '../index';
 import { goToUrl } from '../utils/onClickUtils';
 import { UserInfo, AuthState } from '../utils/authState';
-import { FormComponent } from './Form';
+import { ErrorState, FormComponent } from './Form';
 import { ErrorComponent } from './Error';
 
 interface SignInState {
@@ -12,11 +12,6 @@ interface SignInState {
     password: string;
     emailFormat: boolean;
     passwordLength: boolean;
-}
-
-interface ErrorState {
-    field: keyof SignInState;
-    condition: (state: SignInState) => boolean;
 }
 
 export class SignIn extends FormComponent<{}, SignInState> {
@@ -31,7 +26,7 @@ export class SignIn extends FormComponent<{}, SignInState> {
         };
     }
 
-    private readonly errorStates: ErrorState[] = [{
+    private readonly errorStates: ErrorState<SignInState>[] = [{
         field: 'emailFormat',
         condition: (state: SignInState) => state.email.indexOf('@') === -1
     }, {

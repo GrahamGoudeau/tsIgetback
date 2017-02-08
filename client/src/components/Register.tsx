@@ -4,7 +4,7 @@ import { AuthState } from '../utils/authState';
 import { showOrHide, updateState } from '../utils/onClickUtils';
 
 import { ErrorComponent } from './Error';
-import { FormComponent } from './Form';
+import { ErrorState, FormComponent } from './Form';
 
 interface InputState {
     firstName: string;
@@ -15,11 +15,6 @@ interface InputState {
     passwordLength: boolean;
     passwordMatch: boolean;
     emailError: boolean;
-}
-
-interface ErrorState<K extends keyof InputState> {
-    field: K;
-    condition: (state: InputState) => boolean; // true indicates error happened
 }
 
 export class Register extends FormComponent<{}, InputState> {
@@ -38,9 +33,12 @@ export class Register extends FormComponent<{}, InputState> {
         };
     }
 
-    private readonly errorStates: ErrorState<keyof InputState>[] = [{
+    private readonly errorStates: ErrorState<InputState>[] = [{
         field: 'passwordLength',
         condition: (state: InputState) => state.password.length < 6
+    }, {
+        field: 'emailError',
+        condition: (state: InputState) => state.email.indexOf('@') === -1
     }, {
         field: 'passwordMatch',
         condition: (state: InputState) => state.password !== state.passwordConfirm
@@ -89,6 +87,7 @@ export class Register extends FormComponent<{}, InputState> {
                     <label>
                         Email:
                         <input id="email" type="text" value={this.state.email} onChange={this.handleChange.bind(this)}/>
+                        <ErrorComponent doShow={this.state.emailError} message='Please enter a valid email'/>
                     </label>
                 </div>
                 <div>
