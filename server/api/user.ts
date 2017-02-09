@@ -7,9 +7,11 @@ import * as security from './security';
 import { LoggerModule } from './logger';
 import { getEmailerInstance, IEmailer } from './emailer';
 import * as mongoose from 'mongoose';
+import { IGetBackConfig } from '../config';
 
 const log = new LoggerModule('user');
 const emailer: IEmailer = getEmailerInstance();
+const config: IGetBackConfig = IGetBackConfig.getInstance();
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type IUser = models.IUser;
 type ObjectIdTs = models.ObjectIdTs;
@@ -33,10 +35,13 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
                     const emailSendSuccess: boolean = await emailer.userVerification(newUser.firstName, newUser.email, recordUUID);
 
                     // if the email failed (e.g. hit our limit), manually verify
-                    if (!emailSendSuccess) {
+                    if (!emailSendSuccess && config.getBooleanConfig('PRODUCTION')) {
                         badRequest(res, 'could not send email');
                         return;
+                    } else if (!emailSendSuccess) {
+                        await db.verifyUser({email: newUser.email});
                     }
+
                     jsonResponse(res, {
                         newUser: newUser,
                         emailSendSuccess: emailSendSuccess
