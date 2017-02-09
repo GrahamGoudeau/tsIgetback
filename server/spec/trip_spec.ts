@@ -1,6 +1,6 @@
 import * as models from '../api/models';
 import * as test_utils from './test_utils';
-import { makeString, makeEndpoint } from './test_utils';
+import { makeString, combineObjects, makeEndpoint } from './test_utils';
 import { IGetBackResponse } from '../utils/requestUtils';
 import * as WebRequest from 'web-request';
 import { getDateString } from '../utils/functionalUtils';
@@ -50,7 +50,7 @@ describe('The trip endpoints', () => {
     async function createTrip(fromDestination: 'fromCampus' | 'fromAirport', body: any, options: any): Promise<IGetBackResponse> {
         return await WebRequest.json<IGetBackResponse>(
             makeEndpoint(`${fromDestination}/create`),
-            Object.assign({}, {
+            combineObjects({
                 method: 'POST',
                 json: true,
                 body: body

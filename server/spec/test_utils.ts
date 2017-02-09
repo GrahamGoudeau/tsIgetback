@@ -15,6 +15,35 @@ export function makeEndpoint(endpoint: string): string {
     return `${rootUrl}/api/${endpoint}/`;
 }
 
+export function combineObjects(...objs: any[]): any {
+    const result: any = {};
+    objs.forEach(x => Object.assign(result, x));
+    return result;
+}
+
+export async function jsonRequest(endpoint: string, method: 'POST' | 'DELETE', authToken?: string, body?: any): Promise<IGetBackResponse> {
+    if (method === 'POST' && !body) {
+        throw new Error('Must have a body with a POST request');
+    }
+
+    const headerObj: any = {
+        headers: {
+            Cookie: `IgetbackAuth=${authToken ? authToken : ''}`
+        }
+    };
+    const requestInfo: any = {
+        method: method,
+        json: method === 'POST'
+    };
+    if (body) {
+        requestInfo.body = body;
+    }
+
+    const requestData: any = combineObjects(headerObj, requestInfo);
+
+    return await WebRequest.json<IGetBackResponse>(endpoint, requestData);
+}
+
 export function makeString(length: number)
 {
     var text = "";
@@ -67,7 +96,7 @@ export async function login(email: string, password: string): Promise<AuthToken>
 export async function getUser(options: any): Promise<models.IUser> {
     const userResponse: IGetBackResponse = await WebRequest.json<IGetBackResponse>(
         makeEndpoint('user/account'),
-        Object.assign({}, {
+        combineObjects({
             method: 'GET'
         }, options)
     );
