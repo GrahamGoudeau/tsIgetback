@@ -1,10 +1,11 @@
 import * as React from 'react';
+import { Component } from './Component';
 import { Maybe } from 'tsmonad';
 
 import { UserInfo, AuthState } from '../utils/authState';
 import { browserHistory } from 'react-router';
 
-export abstract class SecureComponent<P, S> extends React.Component<P, S> {
+export abstract class SecureComponent<P, S> extends Component<P, S> {
     constructor(props: P) {
         super(props);
     }

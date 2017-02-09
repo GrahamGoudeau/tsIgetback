@@ -12,6 +12,7 @@ interface SignInState {
     password: string;
     emailFormat: boolean;
     passwordLength: boolean;
+    signInFail: boolean;
 }
 
 export class SignIn extends FormComponent<{}, SignInState> {
@@ -22,7 +23,8 @@ export class SignIn extends FormComponent<{}, SignInState> {
             email: '',
             password: '',
             emailFormat: false,
-            passwordLength: false
+            passwordLength: false,
+            signInFail: false
         };
     }
 
@@ -34,21 +36,8 @@ export class SignIn extends FormComponent<{}, SignInState> {
         condition: (state: SignInState) => state.password.length < 6
     }];
 
-    async handleClick(event: any) {
-        const authState: AuthState = AuthState.getInstance();
-        (await authState.getState()).caseOf({
-            just: u => authState.deauthorize(),
-            nothing: () => authState.authorize({
-                firstName: 'g',
-                lastName: 'gouda',
-                email: 'email',
-                authToken: 'IgetbackAuth=0x123'
-            })
-        });
-        goToUrl('/', event);
-    }
-
     async handleSubmit(event: Event) {
+        await this.updateStateAsync('signInFail', false);
         if (this.errorCheck(this.state, this.errorStates)) {
             return;
         }
@@ -63,7 +52,6 @@ export class SignIn extends FormComponent<{}, SignInState> {
                 }
             });
             const data: any = response.data;
-            console.log('data:', data);
             const userInfo: UserInfo = {
                 firstName: data.user.firstName,
                 lastName: data.user.lastName,
@@ -73,9 +61,8 @@ export class SignIn extends FormComponent<{}, SignInState> {
             const authState: AuthState = AuthState.getInstance();
             authState.authorize(userInfo);
             browserHistory.push('/');
-            console.log(response);
         } catch (e) {
-            console.log('fail', e);
+            this.updateState('signInFail', true);
         }
     }
 
@@ -100,6 +87,7 @@ export class SignIn extends FormComponent<{}, SignInState> {
                     </div>
 
                     <input type="button" value='Sign In' onChange={this.handleSubmit.bind(this)}/>
+                    <ErrorComponent doShow={this.state.signInFail} message='Invalid username or password'/>
                 </form>
             </div>
         );

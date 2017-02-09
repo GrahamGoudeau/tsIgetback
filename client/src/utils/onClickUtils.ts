@@ -1,4 +1,5 @@
 import { browserHistory } from 'react-router';
+import * as React from 'react';
 
 export const goToUrl = (url: string, event?: any) => {
     if (!event) {
@@ -19,8 +20,8 @@ export function showOrHide(p: boolean) {
     return 'hidden';
 }
 
-export function updateState<T, K extends keyof T>(state: T, key: K, value: T[K]): T {
-    const update: any = {};
-    update[key] = value;
-    return Object.assign({}, state, update);
+export function newObject(...objs: any[]): any {
+    let result: any = {};
+    objs.forEach(o => Object.assign(result, o));
+    return result;
 }

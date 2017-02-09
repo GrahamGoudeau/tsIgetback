@@ -1,11 +1,12 @@
 import * as React from 'react';
+import { Component } from './Component';
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem, Button } from 'react-bootstrap';
 import { ApplicationState } from '../index';
 import { showOrHide, goToUrl } from '../utils/onClickUtils';
 import { AuthState } from '../utils/authState';
 import { browserHistory } from 'react-router';
 
-export class MyNav extends React.Component<ApplicationState, {}> {
+export class MyNav extends Component<ApplicationState, {}> {
     constructor(props: ApplicationState) {
         super(props);
     }

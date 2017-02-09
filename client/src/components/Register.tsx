@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { browserHistory } from 'react-router';
 import { AuthState } from '../utils/authState';
-import { showOrHide, updateState } from '../utils/onClickUtils';
+import { showOrHide } from '../utils/onClickUtils';
 
 import { ErrorComponent } from './Error';
 import { ErrorState, FormComponent } from './Form';
