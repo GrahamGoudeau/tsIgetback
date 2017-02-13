@@ -14,7 +14,7 @@ export abstract class SecureComponent<P, S> extends Component<P, S> {
         const authState: AuthState = AuthState.getInstance();
         authState.getState().then((state: Maybe<UserInfo>) => {
             state.caseOf({
-                nothing: () => browserHistory.push('/login'),
+                nothing: () => browserHistory.push('/signIn'),
                 just: u => { return; }
             });
         });

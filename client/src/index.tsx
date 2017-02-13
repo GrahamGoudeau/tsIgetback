@@ -69,4 +69,4 @@ class Root extends React.Component<{}, ApplicationState> {
         );
     }
 }
-ReactDOM.render((<Root/>), document.getElementById('igetback-content'));
+ReactDOM.render(<Root/>, document.getElementById('igetback-content'));
