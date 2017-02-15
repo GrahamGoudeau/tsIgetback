@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+    - "6.2"
+services:
+    - mongodb
+before_script:
+    - sleep 15
+    - mongo mydb_test --eval 'db.addUser("travis", "test");'
+    - cd server; mv .dev.env .env; npm install; npm run dev &
+script: cd server; sleep 5; npm run test

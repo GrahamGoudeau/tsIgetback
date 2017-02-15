@@ -25,9 +25,10 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
 
     if (obj.firstName && obj.lastName && obj.email && obj.password) {
         try {
+            const normalizedEmail: string = obj.email.toUpperCase();
             const newUser: DatabaseResult<IUser> = await db.createUser(obj.firstName,
                                                                        obj.lastName,
-                                                                       obj.email,
+                                                                       normalizedEmail,
                                                                        obj.password);
             newUser.caseOf({
                 right: async newUser => {
@@ -39,6 +40,7 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
                         badRequest(res, 'could not send email');
                         return;
                     } else if (!emailSendSuccess) {
+                        log.INFO('Verifying user', newUser.email, 'automatically');
                         await db.verifyUser({email: newUser.email});
                     }
 
@@ -75,7 +77,7 @@ export async function handleDelete(req: express.Request, res: express.Response):
     }
 
     if (req.body.email) {
-        db.deleteUser({email: req.body.email});
+        db.deleteUser({email: req.body.email.toUpperCase()});
     } else {
         badRequest(res, 'missing email field');
     }
@@ -92,12 +94,13 @@ export async function handleLogin(req: express.Request, res: express.Response): 
         try {
             const query: db.UserPasswordQuery = obj;
             const dbResult: DatabaseResult<IUser> = await db.getUserFromEmailAndPassword(query);
+            const email: string = obj.email.toUpperCase();
             dbResult.caseOf({
                 right: async user => {
                     if (user.verified) {
-                        await db.recordLogin({email: user.email});
+                        await db.recordLogin({email: email});
                         jsonResponse(res, {
-                            authToken: security.buildAuthToken(user.email),
+                            authToken: security.buildAuthToken(email),
                             user: user
                         });
                     } else {
@@ -148,7 +151,7 @@ export async function handleVerify(req: express.Request, res: express.Response):
             badRequest(res, 'bad verification id');
         },
         right: async rec => {
-            await db.verifyUser({email: rec.email})
+            await db.verifyUser({email: rec.email.toUpperCase()})
             res.redirect('/login');
         }
     });
