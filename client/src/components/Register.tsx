@@ -19,6 +19,7 @@ interface InputState {
     emailError: boolean;
     firstNameError: boolean;
     lastNameError: boolean;
+    emailTakenError: boolean;
 }
 
 export class Register extends FormComponent<{}, InputState> {
@@ -35,7 +36,8 @@ export class Register extends FormComponent<{}, InputState> {
             passwordMatch: false,
             emailError: false,
             firstNameError: false,
-            lastNameError: false
+            lastNameError: false,
+            emailTakenError: false
         };
     }
 
@@ -78,7 +80,12 @@ export class Register extends FormComponent<{}, InputState> {
             console.log('redir');
             browserHistory.push('/signIn');
         } catch (e) {
-            console.log('err', e);
+            if (e.responseJSON.error.message === 'email exists') {
+                await this.updateStateAsync('emailTakenError', true);
+            }
+            else {
+                console.log('err', e);
+            }
         }
     }
 
@@ -155,15 +162,20 @@ export class Register extends FormComponent<{}, InputState> {
                                 type="password"
                                 value={this.state.passwordConfirm}
                                 onChange={this.handleChange.bind(this)}/>
-                            <ErrorComponent
+                            <Message
                                 color={IGetBackStyles.WHITE}
-                                reserveSpace={true}
+                                reserveSpace={false}
                                 doShow={this.state.passwordMatch}
                                 message='Passwords must match'/>
                             <input style={IGetBackStyles.buttonStyle.submitButton}
                                 type="button"
                                 value="Register"
                                 onClick={this.handleSubmit.bind(this)}/>
+                            <Message
+                                color={IGetBackStyles.WHITE}
+                                reserveSpace={true}
+                                doShow={this.state.emailTakenError}
+                                message='Email already in use'/>
                         </div>
                     </div>
                 </form>
