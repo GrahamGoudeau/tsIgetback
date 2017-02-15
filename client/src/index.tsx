@@ -39,7 +39,11 @@ class App extends React.Component<{}, ApplicationState> {
 
     render() {
         return (
-            <div style={{width: '100%', height: '100%'}}>
+            <div style={{
+                width: '100%',
+                height: '100%',
+                overflow: 'scroll'
+            }}>
                 <MyNav signedIn={this.state.signedIn}/>
                 {this.props.children}
             </div>

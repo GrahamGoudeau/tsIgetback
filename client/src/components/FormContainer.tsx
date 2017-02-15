@@ -18,7 +18,7 @@ export class FormContainer extends Component<{header: string, width: string}, {}
             //marginBottom: '5%'
         };
         return (
-            <div style={{width: '100%', height: '60%'}}>
+            <div style={{width: '100%', height: '80%'}}>
                 <div style={style}>
                     <div style={headerStyle}>{this.props.header}</div>
                     {this.props.children}
