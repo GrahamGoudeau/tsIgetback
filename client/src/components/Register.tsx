@@ -3,7 +3,7 @@ import { browserHistory } from 'react-router';
 import { AuthState } from '../utils/authState';
 import { showOrHide } from '../utils/onClickUtils';
 
-import { ErrorComponent } from './Error';
+import { Message } from './Message';
 import { ErrorState, FormComponent } from './Form';
 import { FormContainer } from './FormContainer';
 import { IGetBackStyles } from '../utils/style';
@@ -99,9 +99,9 @@ export class Register extends FormComponent<{}, InputState> {
                                 type="text"
                                 value={this.state.firstName}
                                 onChange={this.handleChange.bind(this)}/>
-                            <ErrorComponent
+                            <Message
                                 color={IGetBackStyles.WHITE}
-                                reserveSpace={true}
+                                reserveSpace={false}
                                 doShow={this.state.firstNameError}
                                 message='Must have a first name'/>
 
@@ -112,9 +112,9 @@ export class Register extends FormComponent<{}, InputState> {
                                 type="text"
                                 value={this.state.lastName}
                                 onChange={this.handleChange.bind(this)}/>
-                            <ErrorComponent
+                            <Message
                                 color={IGetBackStyles.WHITE}
-                                reserveSpace={true}
+                                reserveSpace={false}
                                 doShow={this.state.lastNameError}
                                 message='Must have a last name'/>
 
@@ -125,9 +125,9 @@ export class Register extends FormComponent<{}, InputState> {
                                 type="email"
                                 value={this.state.email}
                                 onChange={this.handleChange.bind(this)}/>
-                            <ErrorComponent
+                            <Message
                                 color={IGetBackStyles.WHITE}
-                                reserveSpace={true}
+                                reserveSpace={false}
                                 doShow={this.state.emailError}
                                 message='Please enter a valid .edu email'/>
                         </div>
@@ -142,9 +142,9 @@ export class Register extends FormComponent<{}, InputState> {
                                 type="password"
                                 value={this.state.password}
                                 onChange={this.handleChange.bind(this)}/>
-                            <ErrorComponent
+                            <Message
                                 color={IGetBackStyles.WHITE}
-                                reserveSpace={true}
+                                reserveSpace={false}
                                 doShow={this.state.passwordLength}
                                 message='Password must be at least six characters'/>
 

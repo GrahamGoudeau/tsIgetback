@@ -6,7 +6,7 @@ import { goToUrl } from '../utils/onClickUtils';
 import { UserInfo, AuthState } from '../utils/authState';
 import { IGetBackStyles } from '../utils/style';
 import { ErrorState, FormComponent } from './Form';
-import { ErrorComponent } from './Error';
+import { Message } from './Message';
 import { FormContainer } from './FormContainer';
 
 interface SignInState {
@@ -77,15 +77,15 @@ export class SignIn extends FormComponent<{}, SignInState> {
             <FormContainer width='35%' header='Sign In'>
                 <form onKeyUp={this.handleKeyUp.bind(this)} onSubmit={this.handleSubmit.bind(this)}>
                     <input placeholder="Email" id="email" style={IGetBackStyles.inputBoxStyle} onFocus={this.testFocus} type="email" value={this.state.email} onChange={this.handleChange.bind(this)}/>
-                    <ErrorComponent reserveSpace={false} color={IGetBackStyles.WHITE} doShow={this.state.emailFormat} message='Please enter a valid email address'/>
+                    <Message reserveSpace={false} color={IGetBackStyles.WHITE} doShow={this.state.emailFormat} message='Please enter a valid email address'/>
 
                     <br/>
                     <input placeholder="Password" id="password" style={IGetBackStyles.inputBoxStyle} type="password" value={this.state.password} onChange={this.handleChange.bind(this)}/>
-                    <ErrorComponent reserveSpace={false} color={IGetBackStyles.WHITE} doShow={this.state.passwordLength} message='Password not long enough'/>
+                    <Message reserveSpace={false} color={IGetBackStyles.WHITE} doShow={this.state.passwordLength} message='Password not long enough'/>
 
                     <br/>
                     <input style={IGetBackStyles.buttonStyle.submitButton} type="button" value='Sign In' onClick={this.handleSubmit.bind(this)} onChange={this.handleSubmit.bind(this)}/>
-                    <ErrorComponent reserveSpace={true} doShow={this.state.signInFail} color={IGetBackStyles.WHITE} message='Invalid username or password'/>
+                    <Message reserveSpace={true} doShow={this.state.signInFail} color={IGetBackStyles.WHITE} message='Invalid username or password'/>
                 </form>
             </FormContainer>
         );
