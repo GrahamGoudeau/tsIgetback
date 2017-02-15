@@ -4,8 +4,10 @@ import { Button } from 'react-bootstrap';
 import { ApplicationState } from '../index';
 import { goToUrl } from '../utils/onClickUtils';
 import { UserInfo, AuthState } from '../utils/authState';
+import { IGetBackStyles } from '../utils/style';
 import { ErrorState, FormComponent } from './Form';
 import { ErrorComponent } from './Error';
+import { FormContainer } from './FormContainer';
 
 interface SignInState {
     email: string;
@@ -37,8 +39,8 @@ export class SignIn extends FormComponent<{}, SignInState> {
     }];
 
     async handleSubmit(event: Event) {
-        await this.updateStateAsync('signInFail', false);
-        if (this.errorCheck(this.state, this.errorStates)) {
+        if (await this.errorCheck(this.state, this.errorStates)) {
+            await this.updateStateAsync('signInFail', false);
             return;
         }
         try {
@@ -66,30 +68,26 @@ export class SignIn extends FormComponent<{}, SignInState> {
         }
     }
 
+    testFocus(e: any) {
+        console.log(e);
+    }
+
     render() {
         return (
-            <div>
+            <FormContainer width='35%' header='Sign In'>
                 <form onKeyUp={this.handleKeyUp.bind(this)} onSubmit={this.handleSubmit.bind(this)}>
-                    <div>
-                        <label>
-                            Email:
-                            <input id="email" type="email" value={this.state.email} onChange={this.handleChange.bind(this)}/>
-                            <ErrorComponent doShow={this.state.emailFormat} message='Please enter a valid email address'/>
-                        </label>
-                    </div>
+                    <input placeholder="Email" id="email" style={IGetBackStyles.inputBoxStyle} onFocus={this.testFocus} type="email" value={this.state.email} onChange={this.handleChange.bind(this)}/>
+                    <ErrorComponent reserveSpace={false} color={IGetBackStyles.WHITE} doShow={this.state.emailFormat} message='Please enter a valid email address'/>
 
-                    <div>
-                        <label>
-                            Password:
-                            <input id="password" type="password" value={this.state.password} onChange={this.handleChange.bind(this)}/>
-                            <ErrorComponent doShow={this.state.passwordLength} message='Password not long enough!'/>
-                        </label>
-                    </div>
+                    <br/>
+                    <input placeholder="Password" id="password" style={IGetBackStyles.inputBoxStyle} type="password" value={this.state.password} onChange={this.handleChange.bind(this)}/>
+                    <ErrorComponent reserveSpace={false} color={IGetBackStyles.WHITE} doShow={this.state.passwordLength} message='Password not long enough'/>
 
-                    <input type="button" value='Sign In' onChange={this.handleSubmit.bind(this)}/>
-                    <ErrorComponent doShow={this.state.signInFail} message='Invalid username or password'/>
+                    <br/>
+                    <input style={IGetBackStyles.buttonStyle.submitButton} type="button" value='Sign In' onClick={this.handleSubmit.bind(this)} onChange={this.handleSubmit.bind(this)}/>
+                    <ErrorComponent reserveSpace={true} doShow={this.state.signInFail} color={IGetBackStyles.WHITE} message='Invalid username or password'/>
                 </form>
-            </div>
+            </FormContainer>
         );
     }
 };

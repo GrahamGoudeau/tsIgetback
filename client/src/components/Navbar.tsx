@@ -3,6 +3,7 @@ import { Component } from './Component';
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem, Button } from 'react-bootstrap';
 import { ApplicationState } from '../index';
 import { showOrHide, goToUrl } from '../utils/onClickUtils';
+import { IGetBackStyles } from '../utils/style';
 import { AuthState } from '../utils/authState';
 import { browserHistory } from 'react-router';
 
@@ -17,18 +18,24 @@ export class MyNav extends Component<ApplicationState, {}> {
         browserHistory.push('/');
     }
 
+    testFocus(event: any) {
+        console.log(event);
+    }
+
     render() {
         return (
-            <Navbar>
+            <Navbar className="navbar navbar-default navbar-static-top" style={IGetBackStyles.navbarStyle.navbarGlobal}>
                 <Navbar.Header>
                     <Navbar.Brand>
-                        <a href='' onClick={goToUrl('/')}>I Get Back</a>
+                        <a href='#' onClick={goToUrl('/')}>I Get Back</a>
                     </Navbar.Brand>
                     <Navbar.Toggle />
                 </Navbar.Header>
                 <Navbar.Collapse>
                     <Nav>
-                        <NavItem className={showOrHide(this.props.signedIn)} eventKey={1} href='' onClick={goToUrl('/t')}>Campus → Airport</NavItem>
+                        <NavItem className={showOrHide(this.props.signedIn)} eventKey={1} href='' onClick={goToUrl('/t')}>
+                            Campus → Airport
+                        </NavItem>
                         <NavItem className={showOrHide(this.props.signedIn)} eventKey={2} href=''>Airport → Campus</NavItem>
                     </Nav>
                     <Nav pullRight>

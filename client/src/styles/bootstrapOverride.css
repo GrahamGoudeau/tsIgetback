@@ -1,0 +1,10 @@
+#igetback-content .navbar-default .navbar-nav>li>a,
+#igetback-content .navbar-default .navbar-header a {
+    color: white
+}
+
+#igetback-content .navbar-default .navbar-nav>li>a:hover,
+#igetback-content .navbar-default .navbar-header a:hover {
+    background-color:#FFF;
+    color: black
+}

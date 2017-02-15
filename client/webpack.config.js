@@ -15,7 +15,8 @@ module.exports = {
     plugins: [
         new CopyWebpackPlugin([
                 { from: "node_modules/react/dist/react.min.js", to: distDir },
-                { from: "node_modules/react-dom/dist/react-dom.min.js", to: distDir }
+                { from: "node_modules/react-dom/dist/react-dom.min.js", to: distDir },
+                { from: "src/styles/*.css", to: distDir }
             ])
     ],
 

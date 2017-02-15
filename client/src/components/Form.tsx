@@ -12,7 +12,7 @@ export abstract class FormComponent<P, S> extends Component<P, S> {
         super(props);
     }
 
-    errorCheck(originalState: S, errorStates: ErrorState<S>[]): boolean {
+    async errorCheck(originalState: S, errorStates: ErrorState<S>[]): Promise<boolean> {
         let error = false;
         const newState: S = newObject(
             originalState,
@@ -27,7 +27,7 @@ export abstract class FormComponent<P, S> extends Component<P, S> {
             }, originalState)
         );
 
-        this.setState(newState);
+        await this.setState(newState);
         return error;
     }
 

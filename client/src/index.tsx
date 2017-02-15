@@ -11,6 +11,7 @@ import { SignIn } from './components/SignIn';
 import { UserInfo, AuthState, AuthCallback } from './utils/authState';
 import { Account } from './components/Account';
 import { Register } from './components/Register';
+import { IGetBackStyles } from './utils/style';
 
 export interface ApplicationState {
     signedIn: boolean
@@ -38,7 +39,7 @@ class App extends React.Component<{}, ApplicationState> {
 
     render() {
         return (
-            <div>
+            <div style={{width: '100%', height: '100%'}}>
                 <MyNav signedIn={this.state.signedIn}/>
                 {this.props.children}
             </div>
@@ -53,7 +54,7 @@ class Root extends React.Component<{}, ApplicationState> {
 
     render() {
         return (
-            <div>
+            <div style={IGetBackStyles.globalStyle}>
                 <Router history={browserHistory}>
                     <Route path='/' component={App}>
                         <IndexRoute component={Hello} />
