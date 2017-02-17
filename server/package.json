@@ -4,8 +4,9 @@
   "description": "",
   "main": "ts-node index.ts",
   "scripts": {
+    "dev:ts": "env $(cat .env) nodemon -e js --exec 'ts-node' index.ts",
     "test": "env $(cat .env) ts-node node_modules/jasmine/bin/jasmine.js spec/*.ts",
-    "dev": "env $(cat .env) nodemon -e js --exec 'ts-node' index.ts",
+    "dev": "env $(cat .env) nodemon -e js index.js",
     "build": "tsc",
     "watch": "tsc -w",
     "serve": "ts-node index.ts",
