@@ -1,4 +1,5 @@
 # I Get Back
+[![Build Status](https://travis-ci.org/GrahamGoudeau/tsIgetback.svg?branch=master)](https://travis-ci.org/GrahamGoudeau/tsIgetback)
 
 ## Building Locally
 
