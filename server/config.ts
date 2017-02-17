@@ -60,12 +60,18 @@ export class IGetBackConfig {
     };
 
     private getConfig(key: string, returnType: 'boolean' | 'string' | 'number'): boolean | string | number {
+        let reason: string = null;
         if (this.env[key] == null) {
-            throw new Error(`Config key ${key} not set`);
+            reason = `Config key ${key} not set`;
         } else if (this.typeMapping[key] == null) {
-            throw new Error(`Config key ${key} not registered in config.ts`);
+            reason = `Config key ${key} not registered in config.ts`;
         } else if (this.typeMapping[key] !== returnType) {
-            throw new Error(`Config key ${key} not of type '${returnType}'`);
+            reason = `Config key ${key} not of type '${returnType}'`;
+        }
+
+        if (reason != null) {
+            this.log.ERROR(reason);
+            throw new Error(reason);
         }
 
         const value: string = this.env[key];
