@@ -1,39 +1,9 @@
 import * as mongoose from 'mongoose';
-import { NotEmpty, Matches, IsInt, IsDate } from "validator.ts/decorator/Validation";
-import { Escape } from "validator.ts/decorator/Sanitization";
-import { dateRegex } from '../utils/functionalUtils';
 
 export type ObjectIdTs = mongoose.Types.ObjectId;
 export const ObjectIdSchema = mongoose.Schema.Types.ObjectId;
 
-export class Trip {
-    @IsInt({min: 0})
-    maxOtherMembers: Number;
-
-    @IsDate()
-    @Matches(dateRegex)
-    tripDate: Date;
-
-    @IsInt({min: 0, max: 23})
-    tripHour: Number;
-
-    @IsInt({min: 0, max: 45})
-    tripQuarterHour: Number;
-
-    @Escape()
-    @NotEmpty()
-    tripName: string;
-
-    @Escape()
-    @NotEmpty()
-    college: string;
-
-    @Escape()
-    @NotEmpty()
-    airport: string;
-}
-
-export interface ITrip extends Trip {
+export interface ITrip {
     ownerEmail: string;
     maxOtherMembers: number;
     tripMemberEmails: string[];

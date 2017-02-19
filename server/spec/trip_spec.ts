@@ -1,9 +1,9 @@
 import * as models from '../db/models';
 import * as test_utils from './test_utils';
-import { makeString, combineObjects, makeEndpoint } from './test_utils';
+import { makeString, makeEndpoint } from './test_utils';
 import { IGetBackResponse } from '../utils/requestUtils';
 import * as WebRequest from 'web-request';
-import { getDateString } from '../utils/functionalUtils';
+import { getDateString, combineObjects } from '../utils/functionalUtils';
 
 describe('The trip endpoints', () => {
     let globalUser1: models.IUser;
