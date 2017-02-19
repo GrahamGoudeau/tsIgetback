@@ -1,8 +1,8 @@
 import * as models from './models';
 import * as tsmonad from 'tsmonad';
-import * as security from './security';
+import * as security from '../utils/security';
 import * as mongoose from 'mongoose';
-import { LoggerModule } from './logger';
+import { LoggerModule } from '../utils/logger';
 import * as uuid from 'uuid';
 
 const log = new LoggerModule('db');

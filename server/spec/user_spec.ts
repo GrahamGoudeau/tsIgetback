@@ -1,4 +1,4 @@
-import * as models from '../api/models';
+import * as models from '../db/models';
 import { IGetBackResponse, AuthToken } from '../utils/requestUtils';
 import * as test_utils from './test_utils';
 import * as WebRequest from 'web-request';

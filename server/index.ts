@@ -3,12 +3,12 @@ import * as user from './api/user';
 import * as trips from './api/trips';
 import * as mongoose from 'mongoose';
 import * as bodyParser from 'body-parser';
-import { DestinationContext } from './destinationContext';
+import { DestinationContext } from './utils/destinationContext';
 import { HttpMethod, RouteManager, InsecureRoute, InsecureRouteBuilder, SecureRoute, SecureRouteBuilder } from './utils/routeUtils';
-import * as db from './api/db';
+import * as db from './db/dbClient';
 import * as path from 'path';
-import { LoggerModule } from './api/logger';
-import { IGetBackConfig } from './config';
+import { LoggerModule } from './utils/logger';
+import { IGetBackConfig } from './utils/config';
 import { IEmailer, getEmailerInstance } from './api/emailer';
 
 const log: LoggerModule = new LoggerModule('index');

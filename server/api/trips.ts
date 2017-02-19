@@ -1,12 +1,12 @@
-import * as db from './db';
+import * as db from '../db/dbClient';
 import { badRequest, jsonResponse, internalError, successResponse, AuthToken } from '../utils/requestUtils';
-import * as models from './models';
+import * as models from '../db/models';
 import * as express from 'express';
 import * as mongoose from 'mongoose';
 import { Validator } from "validator.ts/Validator";
-import { LoggerModule } from './logger';
-import { DestinationContext } from '../destinationContext';
-import { IGetBackConfig } from '../config';
+import { LoggerModule } from '../utils/logger';
+import { DestinationContext } from '../utils/destinationContext';
+import { IGetBackConfig } from '../utils/config';
 import { Either, Maybe } from 'tsmonad';
 import { getEmailerInstance, IEmailer } from './emailer';
 import { Set } from 'immutable';

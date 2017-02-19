@@ -1,5 +1,5 @@
 import * as Immutable from 'immutable';
-import { linesToSet } from './utils/functionalUtils';
+import { linesToSet } from './functionalUtils';
 
 export class DestinationContext {
     private static INSTANCE: DestinationContext = null;
@@ -13,8 +13,8 @@ export class DestinationContext {
     }
 
     private constructor() {
-        this.airportCodes = linesToSet(`${__dirname}/data/airport-codes.dat`);
-        this.colleges = linesToSet(`${__dirname}/data/colleges.dat`);
+        this.airportCodes = linesToSet(`${__dirname}/../data/airport-codes.dat`);
+        this.colleges = linesToSet(`${__dirname}/../data/colleges.dat`);
     }
 
     public getAirportCodes(): Immutable.Set<string> {

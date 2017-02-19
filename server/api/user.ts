@@ -1,13 +1,13 @@
-import * as db from './db';
+import * as db from '../db/dbClient';
 import * as utils from '../utils/functionalUtils';
 import { badRequest, jsonResponse, internalError, successResponse, unauthorizedError, AuthToken } from '../utils/requestUtils';
-import * as models from './models';
+import * as models from '../db/models';
 import * as express from 'express';
-import * as security from './security';
-import { LoggerModule } from './logger';
+import * as security from '../utils/security';
+import { LoggerModule } from '../utils/logger';
 import { getEmailerInstance, IEmailer } from './emailer';
 import * as mongoose from 'mongoose';
-import { IGetBackConfig } from '../config';
+import { IGetBackConfig } from '../utils/config';
 
 const log = new LoggerModule('user');
 const emailer: IEmailer = getEmailerInstance();

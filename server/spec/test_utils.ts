@@ -1,6 +1,6 @@
 import * as WebRequest from 'web-request';
-import * as models from '../api/models';
-import { IGetBackConfig } from '../config';
+import * as models from '../db/models';
+import { IGetBackConfig } from '../utils/config';
 import { AuthToken, IGetBackResponse } from '../utils/requestUtils';
 import { getDateString } from '../utils/functionalUtils';
 
