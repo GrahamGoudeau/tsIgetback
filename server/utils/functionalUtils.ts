@@ -49,3 +49,9 @@ export function getAllRegexMatches(input: string, pattern: string): string[] {
     } while (m);
     return result;
 }
+
+export function combineObjects(...objs: any[]): any {
+    const result: any = {};
+    objs.forEach(x => Object.assign(result, x));
+    return result;
+}

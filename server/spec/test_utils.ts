@@ -2,7 +2,7 @@ import * as WebRequest from 'web-request';
 import * as models from '../db/models';
 import { IGetBackConfig } from '../utils/config';
 import { AuthToken, IGetBackResponse } from '../utils/requestUtils';
-import { getDateString } from '../utils/functionalUtils';
+import { getDateString, combineObjects } from '../utils/functionalUtils';
 
 
 const config: IGetBackConfig = IGetBackConfig.getInstance();
@@ -13,12 +13,6 @@ export const college: string = 'Tufts University';
 
 export function makeEndpoint(endpoint: string): string {
     return `${rootUrl}/api/${endpoint}/`;
-}
-
-export function combineObjects(...objs: any[]): any {
-    const result: any = {};
-    objs.forEach(x => Object.assign(result, x));
-    return result;
 }
 
 export async function jsonRequest(endpoint: string, method: 'POST' | 'DELETE', authToken?: string, body?: any): Promise<IGetBackResponse> {
