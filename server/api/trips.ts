@@ -1,6 +1,7 @@
 import * as db from '../db/dbClient';
 import { badRequest, jsonResponse, internalError, successResponse, AuthToken } from '../utils/requestUtils';
 import * as models from '../db/models';
+import { buildValidRequest, TripCreateRequest } from '../utils/requestValidation';
 import * as express from 'express';
 import * as mongoose from 'mongoose';
 import { Validator } from "validator.ts/Validator";
@@ -29,14 +30,10 @@ async function handleTripCreate(req: express.Request,
         return;
     }
 
-    const toValidate = new models.Trip();
-    for (let key in req.body) {
-        toValidate[key] = req.body[key];
-    }
-
-    let tripRequest: models.Trip;
+    const toValidate: TripCreateRequest = buildValidRequest(TripCreateRequest, req.body);
+    let tripRequest: TripCreateRequest;
     try {
-        tripRequest = await validator.sanitizeAndValidateAsync<models.Trip>(toValidate);
+        tripRequest = await validator.sanitizeAndValidateAsync<TripCreateRequest>(toValidate);
     } catch (e) {
         log.DEBUG('failed to validate trip:', toValidate, e.message);
         throw e;

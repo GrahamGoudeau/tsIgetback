@@ -1,17 +1,19 @@
 import * as db from '../db/dbClient';
-import * as utils from '../utils/functionalUtils';
 import { badRequest, jsonResponse, internalError, successResponse, unauthorizedError, AuthToken } from '../utils/requestUtils';
 import * as models from '../db/models';
 import * as express from 'express';
+import { Validator } from 'validator.ts/Validator';
 import * as security from '../utils/security';
 import { LoggerModule } from '../utils/logger';
 import { getEmailerInstance, IEmailer } from './emailer';
 import * as mongoose from 'mongoose';
 import { IGetBackConfig } from '../utils/config';
+import { buildValidRequest, UserCreateRequest, UserLoginRequest, UserSubscribeRequest } from '../utils/requestValidation';
 
 const log = new LoggerModule('user');
 const emailer: IEmailer = getEmailerInstance();
 const config: IGetBackConfig = IGetBackConfig.getInstance();
+const validator: Validator = new Validator();
 type DatabaseResult<T> = db.DatabaseResult<T>;
 type IUser = models.IUser;
 type ObjectIdTs = models.ObjectIdTs;
@@ -23,50 +25,56 @@ export async function handleCreateUser(req: express.Request, res: express.Respon
         return;
     }
 
-    if (obj.firstName && obj.lastName && obj.email && obj.password) {
-        try {
-            const normalizedEmail: string = obj.email.toUpperCase();
-            const newUser: DatabaseResult<IUser> = await db.createUser(obj.firstName,
-                                                                       obj.lastName,
-                                                                       normalizedEmail,
-                                                                       obj.password);
-            newUser.caseOf({
-                right: async newUser => {
-                    const recordUUID: string = await db.createVerificationRecord(newUser.email);
-                    const emailSendSuccess: boolean = await emailer.userVerification(newUser.firstName, newUser.email, recordUUID);
+    const request: UserCreateRequest = buildValidRequest(UserCreateRequest, obj);
+    let validRequest: UserCreateRequest;
+    try {
+        validRequest = await validator.sanitizeAndValidateAsync<UserCreateRequest>(request);
+    } catch (e) {
+        badRequest(res, 'failed to validate trip', e.message);
+        log.DEBUG('failed to validate trip', e.message);
+        return;
+    }
 
-                    // if the email failed (e.g. hit our limit), manually verify
-                    if (!emailSendSuccess && config.getBooleanConfig('PRODUCTION')) {
-                        badRequest(res, 'could not send email');
-                        return;
-                    } else if (!emailSendSuccess) {
-                        log.INFO('Verifying user', newUser.email, 'automatically');
-                        await db.verifyUser({email: newUser.email});
-                    }
+    try {
+        const normalizedEmail: string = validRequest.email.toUpperCase();
+        const newUser: DatabaseResult<IUser> = await db.createUser(validRequest.firstName,
+                                                                   validRequest.lastName,
+                                                                   normalizedEmail,
+                                                                   validRequest.password);
+        newUser.caseOf({
+            right: async newUser => {
+                const recordUUID: string = await db.createVerificationRecord(newUser.email);
+                const emailSendSuccess: boolean = await emailer.userVerification(newUser.firstName, newUser.email, recordUUID);
 
-                    jsonResponse(res, {
-                        newUser: newUser,
-                        emailSendSuccess: emailSendSuccess
-                    });
-                    return true;
-                },
-                left: async error => {
-                    if (error === db.DatabaseErrorMessage.USER_EXISTS) {
-                        badRequest(res, 'email exists');
-                    } else {
-                        badRequest(res, 'other error');
-                    }
-                    return false;
+                // if the email failed (e.g. hit our limit), manually verify
+                if (!emailSendSuccess && config.getBooleanConfig('PRODUCTION')) {
+                    badRequest(res, 'could not send email');
+                    return;
+                } else if (!emailSendSuccess) {
+                    log.INFO('Verifying user', newUser.email, 'automatically');
+                    await db.verifyUser({email: newUser.email});
                 }
-            });
-        } catch (e) {
-            const msg = 'exception while creating user';
-            log.ERROR(msg, e.message);
-            internalError(res, msg);
-            return;
-        }
-    } else {
-        badRequest(res, 'missing fields');
+
+                jsonResponse(res, {
+                    newUser: newUser,
+                    emailSendSuccess: emailSendSuccess
+                });
+                return true;
+            },
+            left: async error => {
+                if (error === db.DatabaseErrorMessage.USER_EXISTS) {
+                    badRequest(res, 'email exists');
+                } else {
+                    badRequest(res, 'other error');
+                }
+                return false;
+            }
+        });
+    } catch (e) {
+        const msg = 'exception while creating user';
+        log.ERROR(msg, e.message);
+        internalError(res, msg);
+        return;
     }
 }
 
@@ -90,38 +98,46 @@ export async function handleLogin(req: express.Request, res: express.Response): 
         return;
     }
 
-    if (obj.email && obj.password) {
-        try {
-            const query: db.UserPasswordQuery = obj;
-            const dbResult: DatabaseResult<IUser> = await db.getUserFromEmailAndPassword(query);
-            const email: string = obj.email.toUpperCase();
-            dbResult.caseOf({
-                right: async user => {
-                    if (user.verified) {
-                        await db.recordLogin({email: email});
-                        jsonResponse(res, {
-                            authToken: security.buildAuthToken(email),
-                            user: user
-                        });
-                    } else {
-                        badRequest(res, 'user not verified');
-                    }
-                },
-                left: async error => {
-                    if (error === db.DatabaseErrorMessage.NOT_FOUND) {
-                        unauthorizedError(res, 'could not find user');
-                    } else {
-                        badRequest(res);
-                    }
+    const request: UserLoginRequest = buildValidRequest(UserLoginRequest, obj);
+    let validRequest: UserLoginRequest;
+    try {
+        validRequest = await validator.sanitizeAndValidateAsync<UserLoginRequest>(request);
+    } catch (e) {
+        badRequest(res, 'could not validate login request');
+        return;
+    }
+
+    try {
+        const query: db.UserPasswordQuery = {
+            email: validRequest.email,
+            password: validRequest.password
+        };
+        const dbResult: DatabaseResult<IUser> = await db.getUserFromEmailAndPassword(query);
+        const email: string = query.email.toUpperCase();
+        dbResult.caseOf({
+            right: async user => {
+                if (user.verified) {
+                    await db.recordLogin({email: email});
+                    jsonResponse(res, {
+                        authToken: security.buildAuthToken(email),
+                        user: user
+                    });
+                } else {
+                    badRequest(res, 'user not verified');
                 }
-            });
-        } catch (e) {
-            const msg = 'exception while logging in';
-            log.ERROR(msg, e.message);
-            internalError(res, msg);
-        }
-    } else {
-        badRequest(res);
+            },
+            left: async error => {
+                if (error === db.DatabaseErrorMessage.NOT_FOUND) {
+                    unauthorizedError(res, 'could not find user');
+                } else {
+                    badRequest(res);
+                }
+            }
+        });
+    } catch (e) {
+        const msg = 'exception while logging in';
+        log.ERROR(msg, e.message);
+        internalError(res, msg);
     }
 }
 
@@ -162,26 +178,27 @@ export async function handleSubscribe(req: express.Request,
                                       authToken: AuthToken,
                                       tripType: db.AddToCampusOrAirport
                                      ): Promise<void> {
-    if (!req.body || !req.body.tripDate ||
-            !req.body.airport || !req.body.college ||
-            !req.body.tripHour || !req.body.tripQuarterHour) {
+
+    if (!req.body) {
         badRequest(res, 'missing fields');
         return;
     }
-    const tripDateStr = req.body.tripDate;
-    if (!utils.dateRegex.test(tripDateStr)) {
-        badRequest(res, 'date must be in mm/dd/yyyy format');
+    const request: UserSubscribeRequest = buildValidRequest(UserSubscribeRequest, req.body);
+    let validRequest: UserSubscribeRequest;
+    try {
+        validRequest = await validator.sanitizeAndValidateAsync<UserSubscribeRequest>(request);
+    } catch (e) {
+        badRequest(res, 'could not validate subscribe request', e.message);
         return;
     }
-    const tripDate = new Date(tripDateStr);
 
     const subscription: models.ISubscription = {
         email: authToken.email,
-        tripDate: tripDate,
-        airport: req.body.airport,
-        college: req.body.college,
-        tripHour: req.body.tripHour,
-        tripQuarterHour: req.body.tripQuarterHour,
+        tripDate: validRequest.tripDate,
+        airport: validRequest.airport,
+        college: validRequest.college,
+        tripHour: validRequest.tripHour,
+        tripQuarterHour: validRequest.tripQuarterHour,
         dateCreated: new Date()
     };
     await db.subscribeUser(subscription, tripType);
