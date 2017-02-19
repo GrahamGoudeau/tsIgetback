@@ -1,4 +1,4 @@
-import { getEmailerInstance, IEmailer } from './emailer';
+import { getEmailerInstance, IEmailer } from '../api/emailer';
 import { o } from '../utils/functionalUtils';
 
 enum DebugLevel {

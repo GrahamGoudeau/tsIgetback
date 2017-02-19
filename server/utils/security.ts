@@ -2,8 +2,8 @@ import * as crypto from 'crypto';
 import * as tsmonad from 'tsmonad';
 import { AuthToken } from '../utils/requestUtils';
 import { LoggerModule } from './logger';
-import { IGetBackConfig } from '../config';
-import { getAllRegexMatches } from '../utils/functionalUtils';
+import { IGetBackConfig } from './config';
+import { getAllRegexMatches } from './functionalUtils';
 
 const log = new LoggerModule('security');
 const Maybe = tsmonad.Maybe;

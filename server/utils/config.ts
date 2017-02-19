@@ -1,4 +1,4 @@
-import { LoggerModule } from './api/logger';
+import { LoggerModule } from './logger';
 
 export class IGetBackConfig {
     private static INSTANCE: IGetBackConfig = null;

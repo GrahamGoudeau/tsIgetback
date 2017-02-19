@@ -1,4 +1,4 @@
-import * as models from '../api/models';
+import * as models from '../db/models';
 import * as test_utils from './test_utils';
 import { makeString, combineObjects, makeEndpoint } from './test_utils';
 import { IGetBackResponse } from '../utils/requestUtils';

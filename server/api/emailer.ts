@@ -1,8 +1,8 @@
 import { o } from '../utils/functionalUtils';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
-import { LoggerModule } from './logger';
-import { IGetBackConfig } from '../config';
+import { LoggerModule } from '../utils/logger';
+import { IGetBackConfig } from '../utils/config';
 import * as SparkPost from 'sparkpost';
 import { getDateString } from '../utils/functionalUtils';
 
