@@ -148,7 +148,7 @@ class ProductionEmailer implements IEmailer {
             });
             return res.results.total_accepted_recipients === 1;
         } catch (e) {
-            this.log.ERROR('Exception while sending'); 
+            this.log.ERROR('Exception while sending');
             return false;
         }
     }
