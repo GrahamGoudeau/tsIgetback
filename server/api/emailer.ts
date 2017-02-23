@@ -107,7 +107,6 @@ class ProductionEmailer implements IEmailer {
             });
             const sendTripHour: string = `${tripHour > 12 ? (tripHour - 12) : tripHour}`;
             const amOrPm: string = `${tripHour > 12 ? 'PM' : 'AM'}`;
-            console.log(toAddresses);
             const res = await this.sparkPostClient.transmissions.send({
                 content: {
                     from: this.fromAddress,
@@ -150,7 +149,6 @@ class ProductionEmailer implements IEmailer {
             return res.results.total_accepted_recipients === 1;
         } catch (e) {
             this.log.ERROR('Exception while sending');
-            console.log(e);
             return false;
         }
     }

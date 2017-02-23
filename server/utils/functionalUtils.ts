@@ -42,7 +42,6 @@ export function getAllRegexMatches(input: string, pattern: string): string[] {
     const regex: RegExp = new RegExp(pattern, 'g');
     do {
         m = regex.exec(input);
-        console.log('running:', m);
         if (m) {
             result.push(m[1]);
         }
