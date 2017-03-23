@@ -108,18 +108,18 @@ export async function handleLogin(req: express.Request, res: express.Response): 
     }
 
     try {
+        const normalizedEmail: string = validRequest.email.toUpperCase();
         const query: db.UserPasswordQuery = {
-            email: validRequest.email,
+            email: normalizedEmail,
             password: validRequest.password
         };
         const dbResult: DatabaseResult<IUser> = await db.getUserFromEmailAndPassword(query);
-        const email: string = query.email.toUpperCase();
         dbResult.caseOf({
             right: async user => {
                 if (user.verified) {
-                    await db.recordLogin({email: email});
+                    await db.recordLogin({email: normalizedEmail});
                     jsonResponse(res, {
-                        authToken: security.buildAuthToken(email),
+                        authToken: security.buildAuthToken(normalizedEmail),
                         user: user
                     });
                 } else {
